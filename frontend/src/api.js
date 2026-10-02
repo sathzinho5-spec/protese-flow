@@ -16,7 +16,8 @@ api.interceptors.request.use((cfg) => {
 api.interceptors.response.use(
   (r) => r,
   (err) => {
-    if (err.response?.status === 401) {
+    const authFailure = ['AUTH_REQUIRED', 'SESSION_EXPIRED'].includes(err.response?.data?.code);
+    if (authFailure) {
       localStorage.removeItem('pf_token');
       localStorage.removeItem('pf_user');
       if (!err.config?.url?.includes('/api/auth/')) location.reload();

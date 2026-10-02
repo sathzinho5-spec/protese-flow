@@ -9,12 +9,12 @@ export default function Config() {
   const criar = async () => {
     setMsg('Criando instância...');
     try { const r = await api.post('/api/whatsapp/criar'); setQr(r.data); setMsg('Instância criada! Agora busque o QR.'); }
-    catch (e) { setMsg('Erro: ' + (e.response?.data?.error || e.message)); }
+    catch (e) { setMsg(e.response?.data?.error || 'Não foi possível criar a instância.'); }
   };
   const buscarQr = async () => {
     setMsg('Buscando QR...');
     try { const r = await api.get('/api/whatsapp/qrcode'); setQr(r.data); setMsg('Escaneie no WhatsApp > Aparelhos conectados.'); }
-    catch (e) { setMsg('Suba a Evolution: docker compose up -d — ' + (e.response?.data?.error || e.message)); }
+    catch (e) { setMsg(e.response?.data?.error || 'Não foi possível buscar o QR Code.'); }
   };
   const configurarWebhook = async () => {
     setBusy(true);
@@ -40,7 +40,7 @@ export default function Config() {
           <div className="step"><b>3. Escanear QR</b><span className="small muted">WhatsApp → Aparelhos conectados → Conectar.</span></div>
         </div>
         <div className="form-row">
-          <button className="btn" onClick={criar}>Criar instância</button>
+          <button className="btn" onClick={criar}>Criar instância (se ainda não existir)</button>
           <button className="btn btn-primary" onClick={buscarQr}>Buscar QR Code</button>
           <button className="btn" onClick={configurarWebhook} disabled={busy}>Configurar webhook</button>
         </div>

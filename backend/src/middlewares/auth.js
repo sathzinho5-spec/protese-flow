@@ -12,12 +12,12 @@ export async function requireAuth(req, res, next) {
     // P0-1: links de PDF/impressão abertos em nova aba não levam header —
     // aceita ?token= apenas em GET (nunca em escrita).
     if (!token && req.method === 'GET' && typeof req.query?.token === 'string') token = req.query.token;
-    if (!token) return res.status(401).json({ error: 'Não autenticado' });
+    if (!token) return res.status(401).json({ error: 'Não autenticado', code: 'AUTH_REQUIRED' });
     try {
       req.user = jwt.verify(token, config.jwtSecret);
       return next();
     } catch {
-      return res.status(401).json({ error: 'Sessão expirada' });
+      return res.status(401).json({ error: 'Sessão expirada', code: 'SESSION_EXPIRED' });
     }
   } catch (e) {
     return next(e);

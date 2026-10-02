@@ -7,6 +7,24 @@ export function notFound(req, res) {
 
 // eslint-disable-next-line no-unused-vars
 export function errorHandler(err, req, res, next) {
+  if (err?.isAxiosError && err.response) {
+    const upstreamStatus = err.response.status;
+    const upstream = err.response.data;
+    const messages = [upstream?.message, upstream?.response?.message]
+      .flatMap((value) => Array.isArray(value) ? value : [value])
+      .filter((value) => typeof value === 'string');
+    const detail = messages.join(' ');
+
+    if (upstreamStatus === 401) {
+      return res.status(502).json({ error: 'A Evolution recusou a chave configurada. Confira EVOLUTION_API_KEY em backend/.env.' });
+    }
+    if (upstreamStatus === 403 && /already in use|already exists|já existe/i.test(detail)) {
+      return res.status(409).json({ error: `A instância já existe na Evolution. Use Buscar QR Code para conectar ${process.env.EVOLUTION_INSTANCE || 'a instância atual'}.` });
+    }
+    logger.warn('[evolution] resposta recusada:', upstreamStatus, detail || err.message);
+    return res.status(502).json({ error: `A Evolution API recusou a solicitação (HTTP ${upstreamStatus}).` });
+  }
+
   // Zod: devolve a primeira mensagem em PT em vez do array técnico
   const issues = err?.issues || err?.errors;
   if (Array.isArray(issues) && issues.length) {
