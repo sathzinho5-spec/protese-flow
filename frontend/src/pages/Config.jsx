@@ -22,8 +22,8 @@ export default function Config() {
         <h2 style={{ margin: '0 0 4px' }}>Conectar WhatsApp 📲</h2>
         <p className="muted small">Pareamento via QR Code (Evolution API / Baileys). Sem ele, o painel funciona em modo demonstração.</p>
         <div className="steps">
-          <div className="step"><b>1. Subir Evolution</b><span className="small muted">Rode na pasta do projeto:</span><br /><code>docker compose up -d</code></div>
-          <div className="step"><b>2. Criar instância</b><span className="small muted">Registra a clínica no gateway.</span></div>
+          <div className="step"><b>1. Evolution online</b><span className="small muted">Use a Evolution já iniciada em localhost:8080; não suba outra cópia na mesma porta.</span></div>
+          <div className="step"><b>2. Conectar instância</b><span className="small muted">Se ela já existe, busque o QR Code. Crie uma apenas se ainda não existir.</span></div>
           <div className="step"><b>3. Escanear QR</b><span className="small muted">WhatsApp → Aparelhos conectados → Conectar.</span></div>
         </div>
         <div className="form-row">
@@ -34,7 +34,7 @@ export default function Config() {
       </div>
       <div className="card">
         <strong>Webhook</strong>
-        <p className="small muted">Aponte na Evolution para: <code>http://SEU_IP:3001/webhook/evolution</code> • evento <code>messages.upsert</code></p>
+        <p className="small muted">Na Evolution local via Docker Desktop: <code>http://host.docker.internal:3001/webhook/evolution</code> • evento <code>messages.upsert</code>. A chave da API em <code>backend/.env</code> precisa ser a mesma configurada na Evolution.</p>
         {qr && <pre className="qrbox">{JSON.stringify(qr, null, 2)}</pre>}
       </div>
     </div>
