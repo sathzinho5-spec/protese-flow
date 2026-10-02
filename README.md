@@ -37,6 +37,10 @@ Requer Node.js 22 ou superior para o banco SQLite nativo. O Docker é opcional e
 
 4. Abra <http://localhost:5173> e crie o primeiro acesso de administrador.
 
+No Windows, depois de instalar o Docker Desktop, voce pode iniciar tudo com `iniciar-local.ps1` na pasta do projeto. O script cria `backend/.env` a partir do exemplo, instala dependencias se necessario, reutiliza uma Evolution ja acessivel em `localhost:8080` (ou sobe a copia deste projeto caso nao haja nenhuma) e abre o painel e a API em janelas separadas. Confirme que `EVOLUTION_API_KEY` e `EVOLUTION_INSTANCE` no `backend/.env` correspondem a configuracao da Evolution. O primeiro uso ainda exige conectar a instancia e ler o QR Code do WhatsApp.
+
+Esta opcao nao tem custo de hospedagem, mas depende do computador, Docker e internet permanecerem ligados. O sistema local e apropriado para desenvolvimento e demonstracao; antes de usar com dados reais de pacientes, configure credenciais fortes, backup e armazenamento persistente. O webhook local da Evolution ja aponta para o backend no computador e nao exige URL publica. Para abrir o painel em outros aparelhos pela internet ou receber webhooks de servicos externos, sera necessario configurar uma URL HTTPS segura; nao publique a porta da Evolution diretamente na internet.
+
 Para testar a integração com WhatsApp, configure a mesma `EVOLUTION_API_KEY` no backend e no Docker Compose, inicie o serviço com `docker compose up -d`, crie a instância e leia o QR Code na tela WhatsApp. Configure o webhook da Evolution para `/webhook/evolution` e habilite `messages.upsert`.
 
 ## Publicação
