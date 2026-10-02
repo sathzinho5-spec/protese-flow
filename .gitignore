@@ -4,3 +4,4 @@ backend/uploads/
 .env
 dist/
 backend/.env
+.vercel

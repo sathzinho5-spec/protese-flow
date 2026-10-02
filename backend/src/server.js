@@ -17,7 +17,7 @@ export async function start(port = config.port) {
   app.set('io', io);
   io.on('connection', () => logger.info('[socket] cliente conectado'));
 
-  const server = http.listen(port, () => logger.info(`✅ Backend rodando em http://localhost:${port}`));
+  const server = http.listen(port, '0.0.0.0', () => logger.info(`✅ Backend rodando na porta ${port}`));
   startReminders(io);
 
   const shutdown = () => {

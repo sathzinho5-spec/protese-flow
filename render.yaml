@@ -1,0 +1,70 @@
+services:
+  - type: web
+    name: protese-flow-pedro-api
+    runtime: node
+    rootDir: backend
+    region: ohio
+    plan: starter
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    disk:
+      name: protese-flow-uploads
+      mountPath: /var/data/uploads
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: UPLOAD_DIR
+        value: /var/data/uploads
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false
+      - key: EVOLUTION_API_HOST
+        fromService:
+          type: pserv
+          name: protese-flow-pedro-evolution
+          property: hostport
+      - key: EVOLUTION_API_KEY
+        fromService:
+          type: pserv
+          name: protese-flow-pedro-evolution
+          envVarKey: AUTHENTICATION_API_KEY
+      - key: EVOLUTION_INSTANCE
+        value: clinica-protese
+      - key: CLINICA_NOME
+        value: Clínica de Prótese Dentária
+      - key: CLINICA_ENDERECO
+        value: Configure o endereço no painel Render
+      - key: CLINICA_HORARIO
+        value: Configure o horário no painel Render
+
+  - type: pserv
+    name: protese-flow-pedro-evolution
+    runtime: image
+    image:
+      url: docker.io/atendai/evolution-api:v2.1.75
+    region: ohio
+    plan: starter
+    disk:
+      name: protese-flow-evolution-instances
+      mountPath: /evolution/instances
+      sizeGB: 1
+    envVars:
+      - key: AUTHENTICATION_API_KEY
+        generateValue: true
+      - key: WEBHOOK_GLOBAL_URL
+        value: https://protese-flow-pedro-api.onrender.com/webhook/evolution
+      - key: WEBHOOK_GLOBAL_ENABLED
+        value: "true"
+      - key: WEBHOOK_EVENTS_MESSAGES_UPSERT
+        value: "true"
+      - key: DATABASE_ENABLED
+        value: "false"
+      - key: CACHE_REDIS_ENABLED
+        value: "false"

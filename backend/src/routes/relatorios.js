@@ -42,6 +42,11 @@ router.get('/api/relatorios', asyncHandler(async (req, res) => {
   });
 }));
 
-router.get('/api/health', (req, res) => res.json({ ok: true, uptime: process.uptime(), now: new Date().toISOString(), banco: process.env.DATABASE_URL ? 'postgres' : 'sqlite' }));
+router.get('/api/health', (req, res) => res.json({
+  ok: true,
+  uptime: process.uptime(),
+  now: new Date().toISOString(),
+  banco: process.env.SUPABASE_URL ? 'supabase' : process.env.DATABASE_URL ? 'postgres' : 'sqlite'
+}));
 
 export default router;

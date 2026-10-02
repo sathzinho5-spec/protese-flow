@@ -42,9 +42,10 @@ Para testar a integração com WhatsApp, configure a mesma `EVOLUTION_API_KEY` n
 ## Publicação
 
 - Frontend: o diretório `frontend` tem configuração para Vercel; defina `VITE_API_URL` com a URL pública da API.
-- Backend: há um blueprint para Render em `backend/render.yaml`. Configure `JWT_SECRET` (mínimo de 32 caracteres), `SUPABASE_SERVICE_KEY`, `EVOLUTION_API_KEY`, `EVOLUTION_API_URL` e `FRONTEND_URL` no painel do serviço. As chaves secretas não devem ser colocadas no repositório.
-- Configure a URL pública do Supabase em `SUPABASE_URL`. A credencial de serviço do Supabase deve ter acesso restrito e nunca ser usada no frontend.
-- O envio real de WhatsApp precisa de uma Evolution API acessível publicamente pelo backend. `localhost` não serve como endereço da Evolution hospedada separadamente.
+- Backend e Evolution API: o blueprint `render.yaml` cria a API Node, a Evolution privada na mesma rede e discos persistentes para as sessões e fotos. Ao criar o Blueprint no Render, preencha `SUPABASE_URL`, uma nova `SUPABASE_SERVICE_KEY` e a URL de produção do frontend em `FRONTEND_URL`. A chave de serviço deve ter acesso restrito e nunca pode ser usada no frontend.
+- A chave de acesso da Evolution e o JWT são gerados pelo Render e ligados entre os serviços. A API usa o hostname privado da Evolution; o webhook aponta para a API pública.
+- Frontend: importe o repositório no Vercel com Root Directory `frontend`. Após o Render informar a URL do backend, adicione `VITE_API_URL` com essa URL nas variáveis do projeto Vercel e publique novamente.
+- Os serviços Render configurados como `starter` e os discos persistentes têm cobrança. Confira o preço atual antes de criar o Blueprint.
 
 Antes de cadastrar pacientes reais, confirme o armazenamento persistente de fotos, backups do banco e credenciais de produção. Não use dados reais de pacientes em uma instalação de demonstração.
 
