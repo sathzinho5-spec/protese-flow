@@ -8,7 +8,7 @@ import { logger } from '../logger.js';
 export const PROVIDER_PRESETS = {
   openai: { nome: 'OpenAI', baseUrl: 'https://api.openai.com/v1', models: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini'] },
   gemini: { nome: 'Gemini (modo compatível)', baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', models: ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash'] },
-  groq: { nome: 'Groq', baseUrl: 'https://api.groq.com/openai/v1', models: ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile'] },
+  groq: { nome: 'Groq', baseUrl: 'https://api.groq.com/openai/v1', models: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b', 'qwen/qwen3.6-27b'] },
   ollama: { nome: 'Ollama (local)', baseUrl: 'http://localhost:11434/v1', models: ['llama3.1', 'qwen2.5'] },
   custom: { nome: 'Custom (OpenAI-compatível)', baseUrl: '', models: [] },
 };
@@ -66,7 +66,8 @@ export async function testProvider(id) {
     const out = await chatComplete({
       system: 'Responda exatamente: OK',
       user: 'Teste de conexão. Responda OK.',
-      providerId: id, maxTokens: 20
+      // Reasoning models may use a small token budget before producing visible text.
+      providerId: id, maxTokens: 120
     });
     if (!out?.text) throw new Error('Sem resposta do modelo');
     await db.update('providers', id, { ultimoTeste: new Date().toISOString(), ultimoStatus: 'ok' });
