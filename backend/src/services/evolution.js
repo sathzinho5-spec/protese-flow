@@ -37,11 +37,13 @@ export async function getQrCode() {
 export async function configureWebhook() {
   const url = process.env.EVOLUTION_WEBHOOK_URL || 'http://host.docker.internal:3001/webhook/evolution';
   const res = await api.post(`/webhook/set/${encodeURIComponent(config.evolutionInstance)}`, {
-    enabled: true,
-    url,
-    webhookByEvents: false,
-    webhookBase64: false,
-    events: ['MESSAGES_UPSERT']
+    webhook: {
+      enabled: true,
+      url,
+      webhookByEvents: false,
+      webhookBase64: false,
+      events: ['MESSAGES_UPSERT']
+    }
   });
   return res.data;
 }
