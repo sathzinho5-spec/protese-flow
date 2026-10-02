@@ -122,8 +122,10 @@ function stmt(table) {
 // Migração única do JSON legado
 (function migrate() {
   try {
-    const total = sqlite.prepare("SELECT COUNT(*) AS n FROM usuarios").get().n
-      + sqlite.prepare("SELECT COUNT(*) AS n FROM pacientes").get().n;
+    const total = Object.keys(COLS).reduce(
+      (sum, table) => sum + sqlite.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get().n,
+      0
+    );
     if (total > 0) return;
     if (!fs.existsSync(config.dbPath)) return;
     const data = JSON.parse(fs.readFileSync(config.dbPath, 'utf-8'));
