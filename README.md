@@ -37,7 +37,11 @@ Requer Node.js 22 ou superior para o banco SQLite nativo. O Docker é opcional e
 
 4. Abra <http://localhost:5173> e crie o primeiro acesso de administrador.
 
-No Windows, depois de instalar o Docker Desktop, voce pode iniciar tudo com `iniciar-local.ps1` na pasta do projeto. O script cria `backend/.env` a partir do exemplo, instala dependencias se necessario, reutiliza uma Evolution ja acessivel em `localhost:8080` (ou sobe a copia deste projeto caso nao haja nenhuma) e abre o painel e a API em janelas separadas. Confirme que `EVOLUTION_API_KEY` e `EVOLUTION_INSTANCE` no `backend/.env` correspondem a configuracao da Evolution. O primeiro uso ainda exige conectar a instancia e ler o QR Code do WhatsApp.
+No Windows, execute `iniciar-local.ps1` na pasta do projeto. O script cria `backend/.env` a partir do exemplo, instala dependencias se necessario, reutiliza uma Evolution ja acessivel em `localhost:8080` (ou sobe a copia deste projeto caso nao haja nenhuma), inicia a API local e abre o painel publicado no Vercel. Se pedir, informe a chave da Evolution na entrada oculta; ela fica somente em `backend/.env`. O primeiro uso ainda exige conectar a instancia e ler o QR Code do WhatsApp.
+
+O painel publicado em <https://protese-flow.vercel.app> pode ser usado sem custo no mesmo computador quando a API local estiver iniciada. O iniciador abre a interface publicada e conecta o navegador ao backend em `localhost:3001`; em outro computador ou celular, `localhost` aponta para o proprio aparelho e a API nao estara acessivel. Para acessar de fora da maquina sera preciso configurar um tunel HTTPS ou hospedar a API.
+
+Na tela WhatsApp, use **Buscar QR Code** para uma instancia que ja existe, escaneie no WhatsApp e clique em **Configurar webhook** para registrar o recebimento de mensagens no backend local. O QR aparece como imagem quando a Evolution retorna o campo base64.
 
 Esta opcao nao tem custo de hospedagem, mas depende do computador, Docker e internet permanecerem ligados. O sistema local e apropriado para desenvolvimento e demonstracao; antes de usar com dados reais de pacientes, configure credenciais fortes, backup e armazenamento persistente. O webhook local da Evolution ja aponta para o backend no computador e nao exige URL publica. Para abrir o painel em outros aparelhos pela internet ou receber webhooks de servicos externos, sera necessario configurar uma URL HTTPS segura; nao publique a porta da Evolution diretamente na internet.
 

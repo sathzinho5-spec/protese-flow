@@ -4,6 +4,7 @@ import { api } from '../api.js';
 export default function Config() {
   const [qr, setQr] = useState(null);
   const [msg, setMsg] = useState('');
+  const [busy, setBusy] = useState(false);
 
   const criar = async () => {
     setMsg('Criando instância...');
@@ -15,6 +16,18 @@ export default function Config() {
     try { const r = await api.get('/api/whatsapp/qrcode'); setQr(r.data); setMsg('Escaneie no WhatsApp > Aparelhos conectados.'); }
     catch (e) { setMsg('Suba a Evolution: docker compose up -d — ' + (e.response?.data?.error || e.message)); }
   };
+  const configurarWebhook = async () => {
+    setBusy(true);
+    setMsg('Configurando recebimento de mensagens...');
+    try { await api.post('/api/whatsapp/webhook'); setMsg('Webhook configurado. Mensagens recebidas serão enviadas ao painel.'); }
+    catch (e) { setMsg('Não foi possível configurar o webhook: ' + (e.response?.data?.error || e.message)); }
+    finally { setBusy(false); }
+  };
+
+  const qrBase64 = qr?.base64 || qr?.qrcode?.base64 || qr?.data?.base64;
+  const qrImage = qrBase64
+    ? (qrBase64.startsWith('data:image/') ? qrBase64 : `data:image/png;base64,${qrBase64}`)
+    : null;
 
   return (
     <div>
@@ -27,15 +40,17 @@ export default function Config() {
           <div className="step"><b>3. Escanear QR</b><span className="small muted">WhatsApp → Aparelhos conectados → Conectar.</span></div>
         </div>
         <div className="form-row">
-          <button className="btn btn-primary" onClick={criar}>Criar instância</button>
-          <button className="btn" onClick={buscarQr}>Buscar QR Code</button>
+          <button className="btn" onClick={criar}>Criar instância</button>
+          <button className="btn btn-primary" onClick={buscarQr}>Buscar QR Code</button>
+          <button className="btn" onClick={configurarWebhook} disabled={busy}>Configurar webhook</button>
         </div>
         {msg && <p className="small">{msg}</p>}
       </div>
       <div className="card">
         <strong>Webhook</strong>
-        <p className="small muted">Na Evolution local via Docker Desktop: <code>http://host.docker.internal:3001/webhook/evolution</code> • evento <code>messages.upsert</code>. A chave da API em <code>backend/.env</code> precisa ser a mesma configurada na Evolution.</p>
-        {qr && <pre className="qrbox">{JSON.stringify(qr, null, 2)}</pre>}
+        <p className="small muted">O botão configura a Evolution local para enviar <code>MESSAGES_UPSERT</code> ao backend. A chave da API em <code>backend/.env</code> precisa ser igual à chave configurada na Evolution.</p>
+        {qrImage && <img className="whatsapp-qr" src={qrImage} alt="QR Code para conectar o WhatsApp" />}
+        {qr && !qrImage && <pre className="qrbox">{JSON.stringify(qr, null, 2)}</pre>}
       </div>
     </div>
   );
