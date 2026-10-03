@@ -16,7 +16,7 @@ const emailSchema = z.string()
 const registerSchema = z.object({
   nome: z.string().trim().min(2, 'Nome muito curto'),
   email: emailSchema,
-  senha: z.string().min(4, 'Senha mínima: 4 caracteres'),
+  senha: z.string().min(10, 'Senha mínima: 10 caracteres').max(72, 'Senha muito longa (máximo: 72 caracteres)'),
   papel: z.enum(['admin', 'atendente', 'dentista']).optional()
 });
 

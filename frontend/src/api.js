@@ -27,7 +27,7 @@ api.interceptors.response.use(
 );
 
 export const socket = io(API_ORIGIN, { transports: ['websocket', 'polling'] });
-export const uploadsUrl = (u) => (!u ? '' : u.startsWith('http') ? u : `${API_ORIGIN}${u}`);
+export const uploadsUrl = (u) => (!u ? '' : u.startsWith('http') ? u : authUrl(u));
 export const backendUrl = (p) => `${API_ORIGIN}${p}`;
 export const authUrl = (p) => {
   const t = localStorage.getItem('pf_token');

@@ -27,7 +27,7 @@ router.post('/api/conversas/:telefone/ler', asyncHandler(async (req, res) => {
 
 router.post('/api/conversas/:telefone/enviar', asyncHandler(async (req, res) => {
   const tel = normalizePhone(req.params.telefone);
-  const { texto } = z.object({ texto: z.string().min(1) }).parse(req.body);
+  const { texto } = z.object({ texto: z.string().trim().min(1).max(4000) }).parse(req.body);
   await pausarBot(tel);
   const envio = await trySendText(tel, texto);
   await db.insert('mensagens', { telefone: tel, direcao: 'out-humano', texto, autor: req.user?.nome, enviado: envio.sent });

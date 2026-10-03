@@ -42,7 +42,7 @@ router.delete('/api/providers/:id', soAdmin, asyncHandler(async (req, res) => {
   res.json({ ok: true });
 }));
 
-router.post('/api/providers/:id/test', asyncHandler(async (req, res) => {
+router.post('/api/providers/:id/test', soAdmin, asyncHandler(async (req, res) => {
   res.json(await testProvider(req.params.id));
 }));
 

@@ -40,6 +40,7 @@ export async function configureWebhook() {
     webhook: {
       enabled: true,
       url,
+      headers: { 'x-webhook-secret': config.evolutionWebhookSecret },
       webhookByEvents: false,
       webhookBase64: false,
       events: ['MESSAGES_UPSERT']

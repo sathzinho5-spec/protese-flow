@@ -22,6 +22,14 @@ import agents from './routes/agents.js';
 import logs from './routes/logs.js';
 import providers from './routes/providers.js';
 
+const limiterOptions = (windowMs, max, message) => ({
+  windowMs,
+  limit: max,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  message: { error: message, code: 'RATE_LIMITED' }
+});
+
 export function buildApp() {
   const app = express();
   app.disable('x-powered-by');
@@ -29,15 +37,26 @@ export function buildApp() {
   const allowed = [config.frontendUrl, 'http://localhost:5173'];
   if (process.env.FRONTEND_URL) allowed.push(process.env.FRONTEND_URL);
   app.use(cors({ origin: allowed, credentials: true }));
-  app.use(morgan('tiny'));
+  morgan.token('safe-url', (req) => req.originalUrl.replace(/([?&]token=)[^&]*/g, '$1[redacted]'));
+  app.use(morgan(':method :safe-url :status :response-time ms'));
   app.use(express.json({ limit: '1mb' }));
-  app.use('/uploads', express.static(config.uploadDir));
 
-  // rate limit só em auth + envio (evita travar webhook)
-  const authLimiter = rateLimit({ windowMs: 60_000, max: 60 });
-  app.use('/api/auth/', authLimiter);
+  // Límites independentes: tentativas de credenciais, API autenticada,
+  // callbacks da Evolution e ações que podem enviar mensagens.
+  app.use('/api/auth/login', rateLimit(limiterOptions(15 * 60_000, 8, 'Muitas tentativas de login. Aguarde 15 minutos.')));
+  app.use('/api/auth/register', rateLimit(limiterOptions(60 * 60_000, 5, 'Muitas tentativas de cadastro. Aguarde uma hora.')));
+  app.use('/api/', rateLimit(limiterOptions(60_000, 300, 'Muitas solicitações. Aguarde um minuto.')));
+  app.use('/webhook/evolution', rateLimit(limiterOptions(60_000, 300, 'Webhook temporariamente limitado.')));
+  app.use('/api/conversas/:telefone/enviar', rateLimit(limiterOptions(60_000, 20, 'Limite de envios atingido. Aguarde um minuto.')));
+  app.use('/api/proteses/:id/enviar-orcamento', rateLimit(limiterOptions(60_000, 20, 'Limite de envios atingido. Aguarde um minuto.')));
+  app.use('/api/followups/:id/enviar', rateLimit(limiterOptions(60_000, 20, 'Limite de envios atingido. Aguarde um minuto.')));
 
   app.use(requireAuth);
+  // Fotos e documentos da clínica podem conter dados de pacientes.
+  app.use('/uploads', (req, res, next) => {
+    res.setHeader('Cache-Control', 'private, no-store');
+    next();
+  }, express.static(config.uploadDir, { dotfiles: 'deny', fallthrough: false }));
 
   app.use(auth);
   app.use(pacientes);

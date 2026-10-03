@@ -11,13 +11,13 @@ router.get('/api/agent-functions', asyncHandler(async (req, res) => {
   res.json(m.AGENT_FUNCTIONS);
 }));
 router.get('/api/agents', asyncHandler(async (req, res) => res.json(await db.all('agents'))));
-router.post('/api/agents', asyncHandler(async (req, res) => {
+router.post('/api/agents', soAdmin, asyncHandler(async (req, res) => {
   const body = z.object({ nome: z.string().min(2), prompt: z.string().min(10) }).passthrough().parse(req.body);
   const a = await db.insert('agents', { ativo: true, prioridade: 50, modelo: 'regras', funcoes: [], gatilhos: '', ...body });
   audit(req, 'criar_agente', 'agents', a.id, a.nome);
   res.json(a);
 }));
-router.put('/api/agents/:id', asyncHandler(async (req, res) => {
+router.put('/api/agents/:id', soAdmin, asyncHandler(async (req, res) => {
   const a = await db.update('agents', req.params.id, req.body);
   audit(req, 'atualizar_agente', 'agents', req.params.id, req.body.nome || '');
   res.json(a);
@@ -27,10 +27,10 @@ router.delete('/api/agents/:id', soAdmin, asyncHandler(async (req, res) => {
   await db.remove('agents', req.params.id);
   res.json({ ok: true });
 }));
-router.post('/api/agents/:id/test', asyncHandler(async (req, res) => {
+router.post('/api/agents/:id/test', soAdmin, asyncHandler(async (req, res) => {
   const agent = await db.find('agents', req.params.id);
   if (!agent) return res.status(404).json({ error: 'agente não encontrado' });
-  const { mensagem, telefone } = z.object({ mensagem: z.string().min(1), telefone: z.string().optional() }).parse(req.body);
+  const { mensagem, telefone } = z.object({ mensagem: z.string().trim().min(1).max(2000), telefone: z.string().max(32).optional() }).parse(req.body);
   const tel = normalizePhone(telefone || '5511999999999');
   let paciente = (await db.query('pacientes', (p) => normalizePhone(p.telefone) === tel))[0];
   if (!paciente) paciente = { id: 'teste', nome: 'Paciente Teste', telefone: tel };

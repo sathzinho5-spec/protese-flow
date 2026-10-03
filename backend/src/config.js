@@ -10,6 +10,7 @@ export const config = {
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   evolutionUrl: process.env.EVOLUTION_API_URL || (process.env.EVOLUTION_API_HOST ? `http://${process.env.EVOLUTION_API_HOST}` : 'http://localhost:8080'),
   evolutionKey: process.env.EVOLUTION_API_KEY || 'dev-evolution-key-change-me',
+  evolutionWebhookSecret: process.env.EVOLUTION_WEBHOOK_SECRET || process.env.EVOLUTION_API_KEY || 'dev-evolution-key-change-me',
   evolutionInstance: process.env.EVOLUTION_INSTANCE || 'clinica-protese',
   jwtSecret: process.env.JWT_SECRET || 'dev-only-change-this-jwt-secret',
   clinica: {
