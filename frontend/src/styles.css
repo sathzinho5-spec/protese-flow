@@ -473,7 +473,7 @@ tbody tr:hover { background: #f8fbff; }
 .welcome-card p { color: #d5e5f3; }
 .welcome-primary { color: #214a76; border-color: #f2f8ff; background: #f2f8ff; }
 .welcome-primary:hover { color: #163b62; background: #dfedfb; }
-.welcome-secondary { color: #f4f9ff; border-color: rgba(255,255,255,.32); }
+.welcome-secondary { color: #f4f9ff; border-color: rgba(255,255,255,.32); background: rgba(255,255,255,.12); }
 .welcome-secondary:hover { background: rgba(255,255,255,.15); }
 .welcome-date, .welcome-note { color: #d6e8f7; }
 .tooth-orbit { border-color: rgba(229,245,255,.36); background: radial-gradient(circle at 35% 25%, rgba(216,245,255,.25), rgba(255,255,255,.035) 68%); }
