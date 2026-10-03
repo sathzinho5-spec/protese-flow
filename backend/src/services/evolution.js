@@ -79,9 +79,11 @@ export function extractIncomingMessage(payload) {
   try {
     const msg = payload?.data?.message || payload?.message || {};
     const key = payload?.data?.key || payload?.key || {};
-    const remoteJid = key.remoteJid || '';
+    const remoteJid = String(key.remoteJid || '').toLowerCase();
     const fromMe = key.fromMe || false;
     if (fromMe) return null;
+    // Never let the clinic bot answer WhatsApp groups or status broadcasts.
+    if (payload?.data?.isGroup === true || remoteJid.endsWith('@g.us') || remoteJid.endsWith('@broadcast')) return null;
 
     const phone = remoteJid.replace('@s.whatsapp.net', '').replace('@lid', '');
     const pushName = payload?.data?.pushName || 'Paciente';
