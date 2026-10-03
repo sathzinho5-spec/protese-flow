@@ -358,3 +358,139 @@ tbody tr:hover { background: #fbfcfb; }
   .tooth-orbit span { animation: none; }
   .dashboard-stats .stat, .nav button, .btn { transition: none; }
 }
+
+/* ===== REFORMULA GLOBAL ===== */
+:root {
+  --bg: #f4f7fb;
+  --card: #fff;
+  --ink: #182b43;
+  --muted: #718096;
+  --line: #e4eaf2;
+  --brand: #2563c9;
+  --brand-dark: #194d9f;
+  --brand-light: #edf4ff;
+  --accent: #22a886;
+  --radius: 16px;
+  --shadow: 0 9px 28px rgba(30, 55, 86, .055);
+}
+body { background: var(--bg); color: var(--ink); }
+.app { background: var(--bg); }
+.sidebar {
+  background: #fff;
+  color: #40516a;
+  border-right: 1px solid #e7edf4;
+  box-shadow: 5px 0 22px rgba(23, 44, 73, .025);
+}
+.brand { border-bottom-color: #edf1f5; }
+.brand-logo {
+  color: #fff;
+  background: linear-gradient(140deg, #2868cf, #18a88a);
+  box-shadow: 0 7px 16px rgba(37, 99, 201, .2);
+}
+.brand h2 { color: #18324f; }
+.brand small { color: #8593a5; }
+.nav-label { color: #a0aabb; }
+.nav button { color: #53647a; }
+.nav button:hover { background: #f4f7fb; color: #203d62; }
+.nav button.active {
+  color: #1e5eb9;
+  background: #edf4ff;
+  box-shadow: inset 3px 0 #3477dc;
+}
+.nav .count { color: #fff; background: #3e7cdb; }
+.nav button.active .count { color: #fff; background: #3477dc; }
+.side-card { color: #31435c; background: #f5f8fc; border-color: #e8edf4; }
+.side-card .muted { color: #68788e; }
+.side-card b { color: #213a59 !important; }
+.topbar { background: #fff; border-bottom-color: #e5ebf2; }
+.topbar h1 { color: #172e49; }
+.topbar .sub { color: #8491a2; }
+.content { background: var(--bg); }
+.card, .conv-list, .chat-panel, .detail-panel {
+  border-color: #e5ebf2;
+  border-radius: 17px;
+  box-shadow: 0 8px 25px rgba(27, 54, 88, .045);
+}
+.card { animation: surface-in .34s cubic-bezier(.2,.7,.25,1) both; }
+@keyframes surface-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+.btn { color: #35506f; border-color: #dce5ef; background: #fff; }
+.btn:hover:not(:disabled) { border-color: #c4d5ea; box-shadow: 0 6px 16px rgba(26, 65, 113, .1); }
+.btn-primary { color: #fff; background: #2563c9; border-color: #2563c9; }
+.btn-primary:hover { color: #fff; background: #194d9f; }
+.btn:focus-visible, .nav button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid rgba(37, 99, 201, .24);
+}
+input, select, textarea { color: #203650; }
+.form-card input, .form-card select, .toolbar input, .toolbar select,
+.top-search input, .conv-list header input { border-color: #dfe6ef; background: #fbfcfe; }
+.form-card input:focus, .form-card select:focus, textarea:focus,
+.toolbar input:focus, .toolbar select:focus { border-color: #6b9be1; box-shadow: 0 0 0 3px rgba(37,99,201,.09); }
+.page-head h2, .dashboard-heading h2 { color: #1b334f; }
+.page-head p { color: #8491a2; }
+.table-wrap { border-color: #e7edf4; }
+table { color: #354a63; }
+th { color: #77869a; background: #f5f8fc; border-bottom-color: #e5ebf2; }
+td { border-bottom-color: #edf1f6; }
+tbody tr:hover { background: #f8fbff; }
+.conv-list, .chat-panel, .detail-panel { background: #fff; }
+.conv { border-bottom-color: #edf1f5; }
+.conv:hover { background: #f5f9ff; }
+.conv.active { background: #edf4ff; box-shadow: inset 3px 0 #3477dc; }
+.avatar { color: #245fae; background: linear-gradient(145deg, #dceaff, #e9f6f3); }
+.badge { color: #fff; background: #3477dc; }
+.chat-body { background-color: #f3f7fc; background-image: radial-gradient(#dae4f0 .7px, transparent .7px); }
+.msg.in { color: #354a63; background: #fff; border: 1px solid #e8edf4; }
+.msg.out { color: #205440; background: #def3e8; }
+.msg.out-bot { color: #254e80; background: #e3efff; }
+.chat-input { background: #fff; border-top-color: #e8edf4; }
+.chat-input input { border-color: #dfe6ef; background: #f9fbfd; }
+.detail-panel section { border-bottom-color: #edf1f5; }
+.kanban-col, .step { background: #f7f9fc; border-color: #e5ebf2; }
+.kanban-card { border-color: #e4eaf2; box-shadow: 0 5px 16px rgba(27,54,88,.045); }
+.login-wrap {
+  background: radial-gradient(780px 470px at 8% 8%, #dbeafe, transparent 67%),
+    radial-gradient(660px 440px at 92% 85%, #d9f3e9, transparent 68%), #f4f7fb;
+}
+.login-card { border: 1px solid rgba(225,233,243,.9); border-radius: 24px; box-shadow: 0 24px 70px rgba(28,58,94,.14); }
+.login-card input { border-color: #dfe6ef; background: #fbfcfe; }
+.drawer { color: #40516a; background: #fff; box-shadow: 12px 0 36px rgba(17,35,59,.13); }
+.drawer .brand { border-bottom-color: #edf1f5; }
+.drawer .brand h2 { color: #18324f; }
+.drawer .brand small { color: #8593a5; }
+.drawer .icon-btn { color: #40516a; background: #f4f7fb; border-color: #e3eaf2; }
+.bottomnav { border-top-color: #e4eaf2; box-shadow: 0 -8px 24px rgba(31,54,82,.06); }
+.bottomnav button.active { color: #2563c9; }
+.toasts .toast { color: #fff; background: #203b5c; }
+
+/* A landing panel that now contrasts clearly with the previous green-only shell. */
+.welcome-card {
+  background: linear-gradient(112deg, #173a64 0%, #205c8d 58%, #257b82 100%);
+  box-shadow: 0 18px 38px rgba(26, 66, 112, .18);
+}
+.welcome-label { color: #c7def5; }
+.welcome-label > span, .status-dot { background: #80dfbd; }
+.welcome-card h2 em { color: #aee8d3; }
+.welcome-card p { color: #d5e5f3; }
+.welcome-primary { color: #214a76; border-color: #f2f8ff; background: #f2f8ff; }
+.welcome-primary:hover { color: #163b62; background: #dfedfb; }
+.welcome-secondary { color: #f4f9ff; border-color: rgba(255,255,255,.32); }
+.welcome-secondary:hover { background: rgba(255,255,255,.15); }
+.welcome-date, .welcome-note { color: #d6e8f7; }
+.tooth-orbit { border-color: rgba(229,245,255,.36); background: radial-gradient(circle at 35% 25%, rgba(216,245,255,.25), rgba(255,255,255,.035) 68%); }
+.dashboard-stats .stat { border-color: #e5ebf2; }
+.dashboard-stats .stat .value { color: #1b334f; }
+.stat-icon { color: #2563a7; background: #eaf2ff; }
+.stat-agenda .stat-icon { color: #9b6a25; background: #fbf1e3; }
+.stat-prostheses .stat-icon { color: #586aaa; background: #edf0fa; }
+.stat-finance .stat-icon { color: #28715b; background: #e9f5ee; }
+.section-kicker, .stat-caption { color: #8a98aa; }
+
+@media (max-width: 860px) {
+  .sidebar { display: none; }
+  .topbar { background: rgba(255,255,255,.94); }
+  .bottomnav { background: rgba(255,255,255,.97); backdrop-filter: blur(16px); }
+  .drawer { color: #40516a; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .card { animation: none; }
+}
