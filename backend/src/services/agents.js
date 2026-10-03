@@ -36,22 +36,31 @@ export async function handleWithAgent({ phone, text, paciente, io, testMode }) {
   let reply = null;
   let via = 'regras';
 
-  // Se LLM configurado e modelo do agente != regras, deixa o LLM reescrever/rotear
-  if (agent.modelo && agent.modelo !== 'regras') {
-    const system = `${agent.prompt}\n\nFunções permitidas: ${permitidas.join(', ')}. Intenção detectada: ${intent}. Responda em até 3 frases curtas, pt-BR, com emoji moderado. Se precisar de dado do sistema, diga que vai verificar.`;
-    const llm = await callLLM({ system, user: `Paciente (${phone}): ${text}` });
-    if (llm) { reply = llm; via = `llm:${agent.modelo}`; }
-  }
-
-  if (!reply) {
-    if (!funcao) {
-      // fora do escopo do agente -> não trata, cai no menu antigo
-      return { handled: false, agent, intent };
-    }
+  // Dados e ações da clínica ficam nas funções determinísticas; a IA não inventa
+  // preço, status, horário nem confirma/cancela algo que o sistema não fez.
+  if (funcao) {
     const out = await runFunction(funcao, { phone, text, paciente, io });
     reply = out.reply;
     funcao = out.funcao;
     if (out.transferir && !testMode) pausarBot(phone);
+  } else {
+    // Só encaminhamos a mensagem, sem telefone/nome ou histórico identificável.
+    if (agent.modelo && agent.modelo !== 'regras') {
+      const system = `${agent.prompt}\n\n` +
+        `Atenda em português do Brasil, como uma recepcionista atenciosa e natural. ` +
+        `Responda diretamente em 1 a 3 frases curtas. Não use listas numeradas, menus, ` +
+        `nem repita apresentação; faça no máximo uma pergunta simples quando faltar contexto. ` +
+        `Não invente preços, horários, status de prótese, agendamentos ou dados da clínica. ` +
+        `Não dê diagnóstico, tratamento ou orientação sobre medicamentos. Para dor forte, ` +
+        `inchaço, sangramento ou urgência, encaminhe para a equipe da clínica. ` +
+        `Não diga que executou uma ação no sistema. Evite despejar opções; converse em vez ` +
+        `de apresentar um menu. Funções disponíveis: ${permitidas.join(', ')}.`;
+      const llm = await callLLM({ system, user: text, temperature: 0.65, maxTokens: 300 });
+      if (llm) { reply = llm; via = `llm:${agent.modelo}`; }
+    }
+    if (!reply) {
+      reply = 'Entendi. Pode me contar um pouco melhor o que você precisa? Se preferir, encaminho sua conversa para a equipe.';
+    }
   }
 
   if (!testMode) {

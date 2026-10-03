@@ -9,25 +9,9 @@ const CLINICA_NOME = process.env.CLINICA_NOME || 'Clínica de Prótese Dentária
 const CLINICA_ENDERECO = process.env.CLINICA_ENDERECO || 'Rua das Flores, 123 - Centro';
 const CLINICA_HORARIO = process.env.CLINICA_HORARIO || 'Seg a Sex 08h-18h, Sáb 08h-12h';
 
-const MENU = `🦷 Olá! Aqui é da *${CLINICA_NOME}* 😁
-Como posso te ajudar?
+const MENU = `Oi! 😊 Aqui é da *${CLINICA_NOME}*. Como posso te ajudar hoje? Pode me contar com suas palavras.`;
 
-1️⃣ Agendar avaliação
-2️⃣ Valores de próteses
-3️⃣ Status da minha prótese
-4️⃣ Falar com atendente
-5️⃣ Endereço e horários`;
-
-const TABELA_PRECOS = `💰 *Valores orientativos:*
-
-• Avaliação: GRATUITA
-• Prótese Total (dentadura): a partir de R$ 1.200
-• Prótese Parcial Removível (roxo): a partir de R$ 900
-• Ponte Fixa / Coroa: a partir de R$ 800
-• Overdenture sobre implante: a partir de R$ 3.500
-• Placa de bruxismo: a partir de R$ 400
-
-Digite *1* para agendar sua avaliação gratuita ou *4* para falar com atendente.`;
+const TABELA_PRECOS = 'O valor depende do tipo de prótese e da avaliação. A avaliação inicial é gratuita. Qual tipo você está procurando?';
 
 export async function handleIncoming({ phone, text, pushName, io }) {
   phone = normalizePhone(phone);
@@ -68,6 +52,8 @@ export async function handleIncoming({ phone, text, pushName, io }) {
     await setSession(phone, { step: 'menu', data: {} });
     return reply(phone, MENU, io);
   }
+  // Mantém os atalhos antigos para quem já aprendeu a usar 1–5.
+  if (session.step === 'menu' && /^[1-5]$/.test(lower)) return handleMenu(phone, text, io);
   if (lower === 'atendente' || text === '4') {
     await setSession(phone, { botAtivo: false });
     return reply(phone, '✅ Te transfiro para um atendente humano. Só um instante... 🙏\n(Um atendente vai responder aqui mesmo em instantes)', io);
@@ -146,7 +132,7 @@ async function handleMenu(phone, text, io) {
   if (t === '5') {
     return reply(phone, `📍 *${CLINICA_NOME}*\n${CLINICA_ENDERECO}\n🕐 ${CLINICA_HORARIO}\n\nDigite *menu* para voltar ou *1* para agendar.`, io);
   }
-  return reply(phone, `Não entendi 🤔\n\n${MENU}`, io);
+  return reply(phone, 'Não entendi muito bem. Pode me explicar de outro jeito? Se preferir, encaminho você para a equipe.', io);
 }
 
 async function reply(phone, text, io) {

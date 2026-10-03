@@ -13,7 +13,23 @@ export const AGENT_FUNCTIONS = [
   { key: 'transferir_humano', nome: 'Transferir p/ humano', descricao: 'Pausa o bot e chama atendente' },
 ];
 
-const PREÇOS = `💰 *Valores orientativos:*\n\n• Avaliação: GRATUITA\n• Prótese Total (dentadura): a partir de R$ 1.200\n• Prótese Parcial Removível: a partir de R$ 900\n• Ponte Fixa / Coroa: a partir de R$ 800\n• Overdenture sobre implante: a partir de R$ 3.500\n• Placa de bruxismo: a partir de R$ 400\n\nQuer agendar a avaliação gratuita? Digite *AGENDAR*.`;
+function normalizeText(value) {
+  return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+function respostaValor(text) {
+  const t = String(text).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const valores = [
+    { match: /overdenture|protese sobre implante/, nome: 'Overdenture sobre implante', valor: 'R$ 3.500' },
+    { match: /protese parcial|parcial removivel/, nome: 'Prótese parcial removível', valor: 'R$ 900' },
+    { match: /dentadura|protese total/, nome: 'Prótese total', valor: 'R$ 1.200' },
+    { match: /ponte fixa|coroa/, nome: 'Ponte fixa ou coroa', valor: 'R$ 800' },
+    { match: /placa de bruxismo|bruxismo/, nome: 'Placa para bruxismo', valor: 'R$ 400' },
+  ];
+  const item = valores.find((v) => v.match.test(t));
+  if (!item) return 'O valor depende do tipo de prótese e da avaliação. A avaliação inicial é gratuita. Qual tipo você está procurando?';
+  return `A ${item.nome.toLowerCase()} começa em ${item.valor}. O valor final é definido após a avaliação, que é gratuita.`;
+}
 
 function clinicaInfo() {
   return `📍 *${process.env.CLINICA_NOME || 'Clínica de Prótese Dentária'}*\n${process.env.CLINICA_ENDERECO || ''}\n🕐 ${process.env.CLINICA_HORARIO || ''}`;
@@ -21,15 +37,16 @@ function clinicaInfo() {
 
 // NLU simples por palavras-chave -> intenção
 export function detectIntent(text) {
-  const t = text.toLowerCase();
-  if (/(preço|preco|valor|quanto custa|orçamento|orcamento|tabela)/.test(t)) return 'consultar_valores';
-  if (/(status|minha protese|como está|como esta|pronta|laborat[óo]rio|moldagem|prova)/.test(t)) return 'status_protese';
-  if (/(agendar|marcar|avalia[çc][aã]o|consulta|hor[áa]rio)/.test(t)) return 'agendar_avaliacao';
-  if (/^(confirmo|confirmar|confirmado|sim|vou sim|ok|presen[çc]a)/.test(t.trim())) return 'confirmar_presenca';
-  if (/(remarcar|reagendar|cancelar|desmarcar|n[ãa]o vou|trocar)/.test(t)) return 'remarcar';
-  if (/(endere[çc]o|onde fica|hor[áa]rio de|funcionamento|telefone|local)/.test(t)) return 'info_clinica';
-  if (/(orçamento detalhado|orcamento detalhado|enviar orcamento|me manda o orcamento)/.test(t)) return 'enviar_orcamento';
-  if (/(atendente|humano|falar com algu[ée]m|ajuda|socorro)/.test(t)) return 'transferir_humano';
+  const t = normalizeText(text);
+  if (/(dor forte|inchad|sangr|febre|urgente|emergencia|dificuldade para respirar)/.test(t)) return 'transferir_humano';
+  if (/(orcamento detalhado|enviar orcamento|me manda o orcamento)/.test(t)) return 'enviar_orcamento';
+  if (/(preco|valor|quanto custa|orcamento|tabela|quanto fica|custa)/.test(t)) return 'consultar_valores';
+  if (/(status|minha protese|como esta|pronta|laboratorio|moldagem|prova)/.test(t)) return 'status_protese';
+  if (/^(confirmo|confirmar|confirmado|sim|vou sim|ok|presenca)/.test(t)) return 'confirmar_presenca';
+  if (/(remarcar|reagendar|cancelar|desmarcar|nao vou|trocar)/.test(t)) return 'remarcar';
+  if (/(agendar|marcar|avaliacao|consulta|horario)/.test(t)) return 'agendar_avaliacao';
+  if (/(endereco|onde fica|horario de|funcionamento|telefone|local)/.test(t)) return 'info_clinica';
+  if (/(atendente|humano|falar com alguem|ajuda|socorro)/.test(t)) return 'transferir_humano';
   return 'desconhecida';
 }
 
@@ -47,38 +64,41 @@ export async function runFunction(key, ctx) {
   const tel = normalizePhone(phone);
   switch (key) {
     case 'consultar_valores':
-      return { reply: PREÇOS, funcao: key };
+      return { reply: respostaValor(text), funcao: key };
     case 'info_clinica':
       return { reply: clinicaInfo(), funcao: key };
     case 'status_protese': {
       const prots = await protesesDoTelefone(tel);
-      if (!prots.length) return { reply: '🔍 Não encontrei prótese no seu WhatsApp. Quer falar com atendente? Digite *ATENDENTE*.', funcao: key };
+      if (!prots.length) return { reply: 'Não localizei uma prótese vinculada a este número. Posso pedir para a equipe conferir.', funcao: key };
       const lista = prots.map((p) => `• *${p.tipo}* — ${p.status} (prev: ${p.previsao || 'a combinar'})`).join('\n');
-      return { reply: `🦷 *Status da sua prótese:*\n${lista}`, funcao: key };
+      return { reply: `Consultei aqui: ${lista}. Se quiser, posso chamar a equipe para explicar os próximos passos.`, funcao: key };
     }
     case 'agendar_avaliacao': {
-      const { parseDataAgendamento } = await import('../utils/data.js');
-      const dataTxt = extraiData(text) || 'a combinar';
-      const ag = await db.insert('agendamentos', {
-        pacienteId: paciente?.id, pacienteNome: paciente?.nome || 'Paciente WhatsApp',
-        telefone: tel, data: dataTxt, dataISO: parseDataAgendamento(dataTxt) || undefined,
-        motivo: text.slice(0, 120),
-        status: 'pendente', origem: 'agente-ia'
+      const nome = paciente?.nome && paciente.nome !== 'Paciente' ? paciente.nome : '';
+      await (await import('./sessions.js')).setSession(phone, {
+        step: nome ? 'ag_data' : 'ag_nome',
+        data: nome ? { nome } : {},
       });
-      io?.emit('agendamento:novo', { telefone: tel });
-      return { reply: `✅ *Pré-agendamento registrado!* (${ag.data})\nNossa equipe confirma o horário aqui mesmo. Responda *CONFIRMO* quando receber a confirmação.`, funcao: key };
+      return {
+        reply: nome
+          ? `Claro, ${nome}. Qual dia e período ficam melhores para sua avaliação?`
+          : 'Claro. Qual nome posso informar para a equipe ao pedir sua avaliação?',
+        funcao: key,
+      };
     }
     case 'confirmar_presenca': {
       const pend = (await db.query('agendamentos', (a) => normalizePhone(a.telefone) === tel && a.status === 'pendente')).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
-      if (!pend) return { reply: 'Não encontrei agendamento pendente no seu número. Quer agendar? Digite *AGENDAR*.', funcao: key };
+      if (!pend) return { reply: 'Não encontrei um agendamento pendente neste número. Quer que eu peça para a equipe conferir?', funcao: key };
       await db.update('agendamentos', pend.id, { status: 'confirmado' });
       io?.emit('agendamento:novo', { telefone: tel });
-      return { reply: `✅ *Presença confirmada!* 🎉\n📅 ${pend.data}\nChegue com 10 min de antecedência.`, funcao: key };
+      return { reply: `Presença confirmada para ${pend.data}. A equipe avisa por aqui se houver alguma orientação adicional.`, funcao: key };
     }
     case 'remarcar': {
       const pend = (await db.query('agendamentos', (a) => normalizePhone(a.telefone) === tel && ['pendente', 'confirmado'].includes(a.status))).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
-      if (pend) await db.update('agendamentos', pend.id, { status: 'cancelado', motivoCancel: text });
-      return { reply: '😔 Cancelei seu horário. Qual nova data prefere? (ex: 12/10 manhã)', funcao: key };
+      if (!pend) return { reply: 'Não encontrei um horário ativo para remarcar. Posso encaminhar sua conversa para a equipe.', funcao: key };
+      await db.update('agendamentos', pend.id, { status: 'cancelado', motivoCancel: text });
+      await (await import('./sessions.js')).setSession(phone, { step: 'ag_data', data: { nome: pend.pacienteNome || paciente?.nome || '' } });
+      return { reply: `Certo, cancelei o horário de ${pend.data}. Para qual dia e período você gostaria de remarcar?`, funcao: key };
     }
     case 'enviar_orcamento': {
       const prots = await protesesDoTelefone(tel);
@@ -88,19 +108,14 @@ export async function runFunction(key, ctx) {
       return { reply: texto, funcao: key };
     }
     case 'transferir_humano':
-      return { reply: '✅ Te transfiro para um atendente humano. Só um instante... 🙏', funcao: key, transferir: true };
+      return { reply: 'Vou encaminhar sua conversa para a equipe. Assim que alguém estiver disponível, responde por aqui.', funcao: key, transferir: true };
     default:
       return { reply: null, funcao: 'desconhecida' };
   }
 }
 
-function extraiData(text) {
-  const m = String(text).match(/(\d{1,2}\/\d{1,2})(\s+\d{1,2}h?)?(\s*(manh[ãa]|tarde|noite))?/);
-  return m ? m[0] : null;
-}
-
 // Chamada LLM via Central de IAs (providers). Sem provedor ativo, retorna null -> regras.
-export async function callLLM({ system, user }) {
+export async function callLLM({ system, user, temperature = 0.65, maxTokens = 300 }) {
   try {
     const { chatComplete, defaultProvider } = await import('./ai.js');
     const prov = await defaultProvider();
@@ -111,11 +126,11 @@ export async function callLLM({ system, user }) {
       const r = await axios.post('https://api.openai.com/v1/chat/completions', {
         model: 'gpt-4o-mini',
         messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
-        temperature: 0.3, max_tokens: 400
+        temperature, max_tokens: maxTokens
       }, { headers: { Authorization: `Bearer ${fallbackKey}` }, timeout: 20000 });
       return r.data.choices?.[0]?.message?.content?.trim() || null;
     }
-    const out = await chatComplete({ system, user });
+    const out = await chatComplete({ system, user, temperature, maxTokens });
     return out?.text || null;
   } catch (e) {
     logger.warn('[agents][llm] falha:', e.response?.data || e.message);
