@@ -11,7 +11,7 @@ export default function Login({ onOk }) {
     e.preventDefault();
     const email = form.email.trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-      setErro('E-mail inválido — confira: nome@clinica.com');
+      setErro('Confira o formato do e-mail, por exemplo: nome@empresa.com');
       return;
     }
     if (!form.senha) { setErro('Digite sua senha'); return; }
@@ -31,9 +31,9 @@ export default function Login({ onOk }) {
   return (
     <div className="login-wrap">
       <div className="login-card">
-        <div className="brand-logo" style={{ width: 52, height: 52, fontSize: 28 }}>🦷</div>
-        <h2>PróteseFácil</h2>
-        <p className="muted small">Atendimento WhatsApp da clínica</p>
+        <div className="brand-logo" style={{ width: 52, height: 52, fontSize: 28 }}>S</div>
+        <h2>Seth Digital</h2>
+        <p className="muted small">Sites e sistemas para negócios</p>
         <div className="form-row" style={{ justifyContent: 'center', margin: '12px 0' }}>
           <button className={`btn btn-sm ${modo === 'login' ? 'btn-primary' : ''}`} onClick={() => setModo('login')}>Entrar</button>
           <button className={`btn btn-sm ${modo === 'register' ? 'btn-primary' : ''}`} onClick={() => setModo('register')}>Criar conta</button>
@@ -45,7 +45,7 @@ export default function Login({ onOk }) {
           {erro && <div className="pill cancelado">{erro}</div>}
           <button className="btn btn-primary" disabled={loading}>{loading ? '...' : modo === 'login' ? 'Entrar →' : 'Criar primeiro acesso (admin)'}</button>
         </form>
-        <p className="small muted" style={{ marginTop: 12 }}>Primeira conta criada vira <b>admin</b>. Depois cadastre atendentes em Equipe.</p>
+        <p className="small muted" style={{ marginTop: 12 }}>Primeira conta criada vira <b>admin</b>. Depois cadastre sua equipe em Equipe.</p>
       </div>
     </div>
   );

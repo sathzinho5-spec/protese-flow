@@ -59,7 +59,7 @@ export default function Atendimento() {
       <div className="conv-list">
         <header>
           <strong>Conversas</strong> <span className="muted small">{filtradas.length}</span>
-          <input placeholder="🔍 Buscar paciente ou número..." value={busca} onChange={e => setBusca(e.target.value)} />
+          <input placeholder="🔍 Buscar cliente ou número..." value={busca} onChange={e => setBusca(e.target.value)} />
         </header>
         <div className="convs">
           {filtradas.map(c => (
@@ -105,17 +105,17 @@ export default function Atendimento() {
       </div>
 
       <div className="detail-panel">
-        <header><strong>Detalhe do paciente</strong></header>
+        <header><strong>Detalhe do cliente</strong></header>
         <section>
-          <h5>Paciente</h5>
+          <h5>Cliente</h5>
           {detalhe.paciente ? (
             <><div className="kv"><b>{detalhe.paciente.nome}</b></div><div className="kv muted">{detalhe.paciente.telefone}</div><div className="kv small">{detalhe.paciente.observacoes || '—'}</div></>
-          ) : <div className="small muted">{tel ? 'Paciente ainda sem cadastro completo.' : 'Selecione uma conversa.'}</div>}
+          ) : <div className="small muted">{tel ? 'Cliente ainda sem cadastro completo.' : 'Selecione uma conversa.'}</div>}
         </section>
         <section>
-          <h5>Próteses ({detalhe.proteses.length})</h5>
-          {detalhe.proteses.map(p => <div key={p.id} className="kv">🦷 {p.tipo} — <span className={`pill ${p.status}`}>{p.status}</span></div>)}
-          {detalhe.proteses.length === 0 && <div className="small muted">Nenhuma prótese vinculada.</div>}
+          <h5>Projetos ({detalhe.proteses.length})</h5>
+          {detalhe.proteses.map(p => <div key={p.id} className="kv">✦ {p.tipo} — <span className={`pill ${p.status}`}>{p.status}</span></div>)}
+          {detalhe.proteses.length === 0 && <div className="small muted">Nenhum projeto vinculado.</div>}
         </section>
         <section>
           <h5>Bot automático</h5>

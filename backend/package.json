@@ -1,7 +1,7 @@
 {
-  "name": "clinica-protese-backend",
+  "name": "seth-digital-backend",
   "version": "1.0.0",
-  "description": "Sistema de atendimento WhatsApp para clínica de prótese dentária",
+  "description": "Gestão de clientes e projetos de sites e sistemas para negócios",
   "type": "module",
   "main": "src/index.js",
   "scripts": {

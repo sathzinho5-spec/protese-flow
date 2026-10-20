@@ -11,7 +11,7 @@ export default function Agentes() {
   const [form, setForm] = useState({ nome: '', descricao: '', prompt: '', funcoes: [], gatilhos: '', prioridade: 50, ativo: true, modelo: 'regras' });
   const [settings, setSettings] = useState({ provider: 'openai', model: 'gpt-4o-mini', baseUrl: 'https://api.openai.com/v1', apiKey: '' });
   const [runs, setRuns] = useState([]);
-  const [teste, setTeste] = useState({ mensagem: 'Quanto custa uma dentadura?', telefone: '5511999999999' });
+  const [teste, setTeste] = useState({ mensagem: 'Preciso de um site para minha empresa', telefone: '5511999999999' });
   const [resTeste, setResTeste] = useState(null);
 
   const carregar = () => {
@@ -89,7 +89,7 @@ export default function Agentes() {
         <div className="card">
           <h2 style={{ marginTop: 0 }}>{sel ? `Editar — ${sel.nome}` : 'Novo agente'}</h2>
           <div className="form-card" style={{ gridTemplateColumns: '1fr 1fr' }}>
-            <input placeholder="Nome * ex: Recepcionista" value={form.nome} onChange={e => setForm({ ...form, nome: e.target.value })} />
+            <input placeholder="Nome * ex: Atendimento comercial" value={form.nome} onChange={e => setForm({ ...form, nome: e.target.value })} />
             <input placeholder="Descrição" value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} />
             <input placeholder="Gatilhos (vírgula) ex: preço, orçamento" value={form.gatilhos} onChange={e => setForm({ ...form, gatilhos: e.target.value })} />
             <div className="form-row">
@@ -99,7 +99,7 @@ export default function Agentes() {
             </div>
           </div>
           <label className="small"><b>Prompt do agente *</b> — personalidade, regras, o que nunca fazer</label>
-          <textarea rows={7} style={{ width: '100%', padding: 10, borderRadius: 10, border: '1px solid #e2e8f0', marginTop: 6 }} placeholder="Você é a recepcionista da clínica..." value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} />
+          <textarea rows={7} style={{ width: '100%', padding: 10, borderRadius: 10, border: '1px solid #e2e8f0', marginTop: 6 }} placeholder="Você atende clientes da Seth Digital, empresa de sites e sistemas..." value={form.prompt} onChange={e => setForm({ ...form, prompt: e.target.value })} />
           <div style={{ marginTop: 10 }}><b>Funções permitidas</b><p className="small muted">O agente só executa o que está marcado. Intenção fora disso cai no menu antigo.</p>
             <div className="form-row">
               {funcs.map(f => (
@@ -118,13 +118,13 @@ export default function Agentes() {
           <hr />
           <strong>🧪 Testar prompt + função</strong>
           <div className="form-card" style={{ gridTemplateColumns: '1fr 200px auto', marginTop: 8 }}>
-            <input placeholder="Mensagem do paciente ex: Quanto custa?" value={teste.mensagem} onChange={e => setTeste({ ...teste, mensagem: e.target.value })} />
+            <input placeholder="Mensagem do cliente ex: Preciso de um site" value={teste.mensagem} onChange={e => setTeste({ ...teste, mensagem: e.target.value })} />
             <input placeholder="Telefone teste" value={teste.telefone} onChange={e => setTeste({ ...teste, telefone: e.target.value })} />
             <button className="btn btn-primary" onClick={testar}>Testar</button>
           </div>
           {resTeste && (
             <div className="kanban-card">
-              <div className="small">intenção: <b>{resTeste.intent}</b> • função: <b>{resTeste.funcao}</b> • via: {resTeste.via}</div>
+              <div className="small">intenção: <b>{resTeste.intent}</b> • função: <b>{resTeste.funcao}</b> • via: {resTeste.via}{resTeste.memoria ? ` • 🧠 memória: ${resTeste.memoria} msgs` : ''}</div>
               <div style={{ marginTop: 6, whiteSpace: 'pre-wrap' }}>{resTeste.reply}</div>
             </div>
           )}

@@ -5,6 +5,15 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const business = {
+  name: process.env.BUSINESS_NAME || 'Seth Digital',
+  tagline: process.env.BUSINESS_TAGLINE || 'Sites e sistemas para negócios',
+  address: process.env.BUSINESS_ADDRESS || '',
+  hours: process.env.BUSINESS_HOURS || '',
+  services: (process.env.BUSINESS_SERVICES || 'sites institucionais, landing pages, lojas virtuais, sistemas web e automações')
+    .split(',').map((item) => item.trim()).filter(Boolean)
+};
+
 export const config = {
   port: Number(process.env.PORT || 3001),
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
@@ -13,11 +22,7 @@ export const config = {
   evolutionWebhookSecret: process.env.EVOLUTION_WEBHOOK_SECRET || process.env.EVOLUTION_API_KEY || 'dev-evolution-key-change-me',
   evolutionInstance: process.env.EVOLUTION_INSTANCE || 'clinica-protese',
   jwtSecret: process.env.JWT_SECRET || 'dev-only-change-this-jwt-secret',
-  clinica: {
-    nome: process.env.CLINICA_NOME || 'Clínica de Prótese Dentária',
-    endereco: process.env.CLINICA_ENDERECO || 'Rua das Flores, 123 - Centro',
-    horario: process.env.CLINICA_HORARIO || 'Seg a Sex 08h-18h, Sáb 08h-12h',
-  },
+  business,
   uploadDir: process.env.UPLOAD_DIR || path.join(__dirname, '..', 'uploads'),
   dbPath: path.join(__dirname, '..', 'data', 'db.json'),
 };

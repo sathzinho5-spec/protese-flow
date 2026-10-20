@@ -19,16 +19,16 @@ import { Toaster } from './components/ui.jsx';
 import './styles.css';
 
 const TABS = {
-  dashboard: { title: 'Visão geral', sub: 'Acompanhe a clínica em tempo real' },
-  atendimento: { title: 'Atendimento', sub: 'Inbox WhatsApp — agentes + CONFIRMO/REMARCAR' },
-  agenda: { title: 'Agenda', sub: 'Avaliações, provas e entregas' },
-  pacientes: { title: 'Pacientes', sub: 'Cadastro e histórico' },
-  proteses: { title: 'Próteses + Fotos', sub: 'Do orçamento à entrega, com evolução' },
+  dashboard: { title: 'Visão geral', sub: 'Acompanhe sua operação em tempo real' },
+  atendimento: { title: 'Atendimento', sub: 'Inbox WhatsApp para clientes e equipe' },
+  agenda: { title: 'Agenda e prazos', sub: 'Reuniões, entregas e próximos passos' },
+  pacientes: { title: 'Clientes', sub: 'Contatos e histórico de relacionamento' },
+  proteses: { title: 'Projetos', sub: 'Do briefing à entrega, em um só fluxo' },
   financeiro: { title: 'Financeiro', sub: 'Entradas, saldo e recibos PDF' },
   relatorios: { title: 'Relatórios', sub: 'Produção, faltas e faturamento' },
-  pos: { title: 'Pós-entrega', sub: 'Revisões e garantia automáticas' },
+  pos: { title: 'Pós-venda', sub: 'Acompanhamentos e retornos programados' },
   agentes: { title: 'Agentes IA', sub: 'Prompts, funções e roteamento' },
-  ias: { title: 'Introduzir IAs', sub: 'Provedores, chaves e vínculo' },
+  ias: { title: 'Integrações de IA', sub: 'Provedores, chaves e modelos' },
   monitor: { title: 'Painel WhatsApp', sub: 'Acompanhe conversas ao vivo' },
   equipe: { title: 'Equipe', sub: 'Atendentes e acessos' },
   logs: { title: 'Auditoria', sub: 'Quem fez o quê (admin)' },
@@ -63,16 +63,16 @@ export default function App() {
     { key: 'atendimento', icon: '💬', nome: 'Atendimento', count: dash.conversasAbertas },
     { key: 'monitor', icon: '📡', nome: 'Painel WA', count: dash.conversasAbertas },
     { key: 'agenda', icon: '📅', nome: 'Agenda', count: dash.agendamentosPendentes },
-    { sec: 'Clínica' },
-    { key: 'pacientes', icon: '👥', nome: 'Pacientes', count: dash.totalPacientes },
-    { key: 'proteses', icon: '🦷', nome: 'Próteses', count: dash.protesesEmAndamento },
+    { sec: 'Negócio' },
+    { key: 'pacientes', icon: '👥', nome: 'Clientes', count: dash.totalPacientes },
+    { key: 'proteses', icon: '🧩', nome: 'Projetos', count: dash.protesesEmAndamento },
     { key: 'financeiro', icon: '💰', nome: 'Financeiro' },
     { key: 'relatorios', icon: '📈', nome: 'Relatórios' },
-    { key: 'pos', icon: '🛡️', nome: 'Pós-entrega' },
+    { key: 'pos', icon: '🤝', nome: 'Pós-venda' },
     { key: 'agentes', icon: '🤖', nome: 'Agentes' },
     { key: 'ias', icon: '🧠', nome: 'IAs' },
     { sec: 'Sistema' },
-    { key: 'equipe', icon: '🧑‍⚕️', nome: 'Equipe' },
+    { key: 'equipe', icon: '🧑‍💻', nome: 'Equipe' },
     ...(user?.papel === 'admin' ? [{ key: 'logs', icon: '🕵️', nome: 'Auditoria' }] : []),
     { key: 'config', icon: '⚙️', nome: 'WhatsApp' },
   ];
@@ -84,10 +84,10 @@ export default function App() {
       <Toaster />
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-logo">🦷</div>
+          <div className="brand-logo">S</div>
           <div>
-            <h2>PróteseFácil</h2>
-            <small>{user?.nome || 'Clínica'} • {user?.papel || ''}</small>
+            <h2>Seth Digital</h2>
+            <small>{user?.nome || 'Equipe'} • {user?.papel || ''}</small>
           </div>
         </div>
 
@@ -115,7 +115,7 @@ export default function App() {
           </div>
           <div className="top-search">
             <span className="pill confirmado hide-mobile">● WhatsApp</span>
-            <button className="btn btn-primary top-cta" onClick={() => go('agenda')}>+ <span className="hide-mobile">Novo agendamento</span><span className="only-mobile">Agendar</span></button>
+          <button className="btn btn-primary top-cta" onClick={() => go('agenda')}>+ <span className="hide-mobile">Novo prazo</span><span className="only-mobile">Agendar</span></button>
           </div>
         </div>
         <div className="content">
@@ -151,8 +151,8 @@ export default function App() {
         <div className="drawer-root only-mobile" onClick={() => setMenuOpen(false)}>
           <div className="drawer" onClick={(e) => e.stopPropagation()}>
             <div className="brand">
-              <div className="brand-logo">🦷</div>
-              <div><h2>PróteseFácil</h2><small>{user?.nome} • {user?.papel}</small></div>
+              <div className="brand-logo">S</div>
+              <div><h2>Seth Digital</h2><small>{user?.nome} • {user?.papel}</small></div>
               <button className="icon-btn" onClick={() => setMenuOpen(false)}>✕</button>
             </div>
             <div className="nav">

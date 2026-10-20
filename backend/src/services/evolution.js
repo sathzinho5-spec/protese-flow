@@ -87,7 +87,7 @@ export function extractIncomingMessage(payload) {
     if (payload?.data?.isGroup === true || remoteJid.endsWith('@g.us') || remoteJid.endsWith('@broadcast')) return null;
 
     const phone = remoteJid.replace('@s.whatsapp.net', '').replace('@lid', '');
-    const pushName = payload?.data?.pushName || 'Paciente';
+    const pushName = payload?.data?.pushName || 'Contato';
 
     const text = msg.conversation
       || msg.extendedTextMessage?.text

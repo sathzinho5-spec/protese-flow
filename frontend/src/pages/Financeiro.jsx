@@ -31,11 +31,11 @@ export default function Financeiro() {
       <div className="card" style={{ marginBottom: 14 }}>
         <strong>Novo lançamento (entrada / parcela)</strong>
         <form onSubmit={salvar} className="form-card" style={{ marginTop: 10, gridTemplateColumns: 'repeat(3, 1fr)' }}>
-          <input placeholder="Descrição ex: Entrada dentadura D. Maria *" value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} required />
+          <input placeholder="Descrição ex: Entrada projeto site *" value={form.descricao} onChange={e => setForm({ ...form, descricao: e.target.value })} required />
           <input placeholder="Valor R$ *" type="number" value={form.valor} onChange={e => setForm({ ...form, valor: e.target.value })} required />
           <select value={form.proteseId} onChange={e => setForm({ ...form, proteseId: e.target.value })}>
-            <option value="">Vincular prótese (opcional)...</option>
-            {proteses.map(p => <option key={p.id} value={p.id}>{p.paciente?.nome} — {p.tipo} (saldo R$ {p.saldo})</option>)}
+            <option value="">Vincular projeto (opcional)...</option>
+            {proteses.map(p => <option key={p.id} value={p.id}>{p.paciente?.empresa || p.paciente?.nome} — {p.tipo} (saldo R$ {p.saldo})</option>)}
           </select>
           <select value={form.tipo} onChange={e => setForm({ ...form, tipo: e.target.value })}><option value="entrada">Entrada</option><option value="parcela">Parcela</option><option value="pagamento">Pagamento total</option></select>
           <select value={form.forma} onChange={e => setForm({ ...form, forma: e.target.value })}><option value="pix">Pix</option><option value="dinheiro">Dinheiro</option><option value="cartao">Cartão</option><option value="boleto">Boleto</option></select>
@@ -47,13 +47,13 @@ export default function Financeiro() {
       <div className="card" style={{ padding: 0 }}>
         <div className="table-wrap" style={{ border: 0 }}>
           <table>
-            <thead><tr><th>Data</th><th>Descrição</th><th>Paciente/Prótese</th><th>Forma</th><th>Valor</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>Data</th><th>Descrição</th><th>Cliente/Projeto</th><th>Forma</th><th>Valor</th><th>Status</th><th></th></tr></thead>
             <tbody>
               {data.lancamentos.map(l => (
                 <tr key={l.id}>
                   <td>{l.data}</td>
                   <td><b>{l.descricao}</b><div className="small muted">{l.tipo}</div></td>
-                  <td className="small">{l.paciente?.nome || '—'}{l.protese ? ` • ${l.protese.tipo}` : ''}</td>
+                  <td className="small">{l.paciente?.empresa || l.paciente?.nome || '—'}{l.protese ? ` • ${l.protese.tipo}` : ''}</td>
                   <td>{l.forma}</td>
                   <td><b>R$ {l.valor}</b></td>
                   <td><span className={`pill ${l.status === 'pago' ? 'confirmado' : 'pendente'}`}>{l.status}</span></td>

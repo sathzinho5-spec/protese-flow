@@ -33,7 +33,7 @@ export function errorHandler(err, req, res, next) {
   }
   const status = err.status || err.statusCode || 500;
   if (status >= 500) logger.error('[api]', req.method, req.path, err.message);
-  if (err.message === 'Apenas imagens') return res.status(400).json({ error: 'Apenas imagens (até 8MB)' });
-  if (err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ error: 'Arquivo excede 8MB' });
+  if (err.message?.startsWith('Envie imagens')) return res.status(400).json({ error: 'Envie imagens JPG, PNG, WebP ou PDF (até 15MB).' });
+  if (err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ error: 'Arquivo excede 15MB.' });
   res.status(status).json({ error: err.message || 'Erro interno' });
 }

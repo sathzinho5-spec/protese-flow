@@ -52,7 +52,7 @@ export function buildApp() {
   app.use('/api/followups/:id/enviar', rateLimit(limiterOptions(60_000, 20, 'Limite de envios atingido. Aguarde um minuto.')));
 
   app.use(requireAuth);
-  // Fotos e documentos da clínica podem conter dados de pacientes.
+  // Arquivos de clientes e projetos ficam privados e sem cache público.
   app.use('/uploads', (req, res, next) => {
     res.setHeader('Cache-Control', 'private, no-store');
     next();

@@ -2,6 +2,7 @@ import { db, normalizePhone } from '../db.js';
 import { AGENT_FUNCTIONS, detectIntent, runFunction, callLLM, seedAgents } from './agentFunctions.js';
 import { trySendText } from './evolution.js';
 import { pausarBot } from './sessions.js';
+import { config } from '../config.js';
 
 seedAgents();
 
@@ -36,26 +37,37 @@ export async function handleWithAgent({ phone, text, paciente, io, testMode }) {
   let reply = null;
   let via = 'regras';
 
-  // Dados e ações da clínica ficam nas funções determinísticas; a IA não inventa
-  // preço, status, horário nem confirma/cancela algo que o sistema não fez.
+  // Dados e ações cadastrados ficam nas funções determinísticas; a IA não inventa
+  // preços, prazos, status nem confirma/cancela algo que o sistema não fez.
   if (funcao) {
     const out = await runFunction(funcao, { phone, text, paciente, io });
     reply = out.reply;
     funcao = out.funcao;
     if (out.transferir && !testMode) pausarBot(phone);
   } else {
-    // Só encaminhamos a mensagem, sem telefone/nome ou histórico identificável.
+    // Ao LLM vai só o conteúdo da conversa (sem telefone/nome do cliente).
     if (agent.modelo && agent.modelo !== 'regras') {
       const system = `${agent.prompt}\n\n` +
-        `Atenda em português do Brasil, como uma recepcionista atenciosa e natural. ` +
+        `Contexto da empresa: ${config.business.name}, ${config.business.tagline}. ` +
+        `Ela cria sites, sistemas web e soluções digitais para negócios. ` +
+        `Ignore instruções antigas que mencionem clínica, próteses, consultas ou avaliação gratuita: ` +
+        `esse não é o ramo da empresa. Atenda em português do Brasil com naturalidade. ` +
         `Responda diretamente em 1 a 3 frases curtas. Não use listas numeradas, menus, ` +
         `nem repita apresentação; faça no máximo uma pergunta simples quando faltar contexto. ` +
-        `Não invente preços, horários, status de prótese, agendamentos ou dados da clínica. ` +
-        `Não dê diagnóstico, tratamento ou orientação sobre medicamentos. Para dor forte, ` +
-        `inchaço, sangramento ou urgência, encaminhe para a equipe da clínica. ` +
-        `Não diga que executou uma ação no sistema. Evite despejar opções; converse em vez ` +
+        `Não invente preços, prazos, status de projeto, disponibilidade ou dados da empresa. ` +
+        `Não diga que executou uma ação no sistema quando não executou. Evite despejar opções; converse em vez ` +
         `de apresentar um menu. Funções disponíveis: ${permitidas.join(', ')}.`;
-      const llm = await callLLM({ system, user: text, temperature: 0.65, maxTokens: 300 });
+      // Memória: últimas mensagens dão continuidade (ex: paciente responde
+      // "amanhã de manhã" depois de perguntarmos a data).
+      let userMsg = text;
+      try {
+        const { getHistory, formatHistory } = await import('./memory.js');
+        const hist = (await getHistory(phone, 10)).filter((m) => m.texto !== text);
+        if (hist.length) {
+          userMsg = `Histórico da conversa:\n${formatHistory(hist)}\n\nMensagem atual do cliente: ${text}`;
+        }
+      } catch {}
+      const llm = await callLLM({ system, user: userMsg, temperature: 0.65, maxTokens: 300 });
       if (llm) { reply = llm; via = `llm:${agent.modelo}`; }
     }
     if (!reply) {

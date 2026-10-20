@@ -1,52 +1,52 @@
-# Auditoria e plano de funcionamento — PróteseFácil
+# Funcionamento e pendências — Seth Digital
 
-Revisado em 2026-10-02. Este documento descreve o código atual e os itens que ainda precisam ser resolvidos antes de usar dados reais.
+Revisado em 2026-10-20. O sistema organiza o atendimento e a operação de uma empresa que desenvolve sites, sistemas e automações para negócios.
 
-## Fluxos encontrados
+## Fluxos
 
-### Atendimento WhatsApp
+### Atendimento e WhatsApp
 
-O webhook da Evolution registra o contato e a mensagem recebida. O bot tenta responder; quando a equipe envia uma resposta manual, o bot é pausado para aquela conversa. A tela de atendimento recebe atualizações por Socket.IO. Sem uma Evolution conectada, os envios ficam registrados como pendentes e não chegam ao paciente.
+O webhook da Evolution registra o contato e a mensagem recebida. O agente pode responder conforme a configuração da empresa; quando a equipe envia uma resposta manual, a automação é pausada para aquela conversa. A tela de atendimento recebe atualizações em tempo real. Sem Evolution conectada, os envios ficam registrados como pendentes e não chegam ao WhatsApp.
 
-### Agenda
+### Clientes e projetos
 
-Agendamentos podem ter data legada em texto ou data e hora ISO. O lembrete automático depende da integração WhatsApp e de configurar `enviarLembrete` no agendamento.
+Os contatos ficam associados a clientes e empresas. Os projetos passam por briefing, planejamento, desenvolvimento, revisão e conclusão, com possibilidade de pausa, anexos, escopo, valor e previsão. O banco mantém identificadores antigos para preservar os dados já cadastrados.
 
-### Próteses
+### Agenda e acompanhamento
 
-O fluxo configurado é `orçado → aprovado → moldagem → prova → laboratório → pronta → entregue`, com etapa de ajuste disponível. Ao marcar como entregue, são criados lembretes de acompanhamento para 7, 30, 180 e 365 dias.
+Compromissos podem ter data legada em texto ou data e hora ISO. Lembretes dependem da integração WhatsApp e da opção de envio habilitada no registro. Projetos concluídos podem gerar acompanhamentos pós-entrega.
 
 ### Financeiro
 
-Os lançamentos podem ser associados a uma prótese; o painel calcula pago e saldo. Há PDF de orçamento e recibo. O estado pago depende de atualizar corretamente o lançamento.
+Lançamentos podem ser associados a clientes e projetos. O painel calcula valores recebidos e pendentes; propostas e recibos podem ser gerados em PDF. O saldo depende de manter os lançamentos atualizados.
 
 ### Acesso e dados
 
-As senhas são armazenadas com hash e o painel usa tokens JWT. O primeiro usuário é o administrador inicial; o cadastro de pessoas para a equipe deve ser feito por um administrador. Cada clínica precisa configurar banco, chave JWT e credenciais próprias.
+As senhas são armazenadas com hash e o painel usa tokens JWT. O primeiro usuário é o administrador inicial; a criação e gestão da equipe ficam restritas a administradores.
 
-## Correções verificadas nesta revisão
+## Verificações realizadas
 
 - A interface React/Vite compila para produção.
-- Em celular, ao abrir uma conversa, a lista dá lugar ao chat e há um botão de retorno.
+- Em celular, a lista de conversas dá lugar ao chat e há um botão de retorno.
 - Animações leves respeitam a preferência do dispositivo por movimento reduzido.
-- A textura do chat não depende mais de imagem hospedada em terceiro.
-- Criar equipe exige sessão de administrador depois do primeiro cadastro. Consulta e edição da equipe também são exclusivas de administradores.
-- A chave privada do banco foi removida do blueprint de hospedagem e substituída por uma variável a ser cadastrada no ambiente.
-- Em produção, a API recusa inicialização sem `JWT_SECRET` forte (mínimo de 32 caracteres).
+- A textura do chat não depende de imagem hospedada em terceiro.
+- A gestão de equipe exige sessão de administrador.
+- A chave privada do banco fica em variável de ambiente, fora do frontend.
+- Em produção, a API exige `JWT_SECRET` forte.
 - Docker e backend usam a mesma variável de chave da Evolution.
-- README e exemplo de ambiente descrevem inicialização e configuração sem credenciais reais.
+- O agente foi direcionado para a Seth Digital: não deve inventar preços, prazos ou status e deve pedir escopo antes de falar de valores.
 
-## Pendências antes de atender pacientes
+## Antes de operar com dados reais
 
-1. **Revogar e substituir as credenciais que já foram versionadas.** Chaves Supabase apareceram em `backend/render.yaml` e `backend/src/db-rest.js`; as cópias atuais foram removidas e substituídas por variáveis de ambiente. Elas continuam no histórico Git. Revogue-as no Supabase e crie novas antes de conectar o banco; a limpeza do histórico remoto exige reescrita da branch e deve ser coordenada com quem mais usa o repositório.
-2. Configurar armazenamento durável de fotos e banco com backup. O disco local do serviço web pode ser efêmero e não deve ser tratado como backup.
-3. Configurar domínio público da Evolution, webhook, chave própria e `FRONTEND_URL` / `VITE_API_URL` de produção.
-4. Validar fluxos de recebimento, envio, lembretes, PDF e permissões no ambiente de implantação com contas de teste antes de cadastrar dados reais.
-5. Fazer revisão de privacidade e retenção de dados com a clínica; fotos e observações podem conter informações de saúde.
+1. Revogue e substitua credenciais que tenham sido publicadas anteriormente no histórico Git; removê-las do código atual não invalida as cópias já expostas.
+2. Configure armazenamento durável para arquivos e banco, além de backups testados.
+3. Configure URL pública HTTPS, webhook, chave própria da Evolution e `FRONTEND_URL` / `VITE_API_URL` no ambiente de produção.
+4. Valide recebimento e envio de WhatsApp, lembretes, PDFs, permissões e recuperação de senha no ambiente implantado.
+5. Defina acesso e retenção para dados de clientes, conversas, propostas e arquivos.
 
-## Limitações técnicas que permanecem
+## Limitações técnicas
 
-- A interface atualizada não substitui a validação operacional da integração WhatsApp: essa depende de credenciais e serviços externos.
-- Não foi feita migração para API oficial do WhatsApp.
-- O projeto ainda não tem cobertura automatizada abrangente de rotas e jornadas; a compilação da interface, por si só, não valida os fluxos de negócio.
-- Antes de aumentar o volume ou operar várias instâncias, revisar paginação, persistência, backups e os limites do banco escolhido.
+- A compilação da interface e os testes automatizados não confirmam a conexão com serviços externos nem substituem a validação dos fluxos de produção.
+- A integração usa Evolution API; o projeto não foi migrado para a API oficial do WhatsApp.
+- Alguns endpoints e tabelas conservam nomes antigos para manter compatibilidade com registros existentes.
+- Antes de aumentar o volume ou operar várias empresas, revisar isolamento de dados, paginação, persistência, backups e limites do banco.

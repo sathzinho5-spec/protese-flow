@@ -12,8 +12,8 @@ router.get('/api/dashboard', asyncHandler(async (req, res) => {
   res.json({
     totalPacientes: (await db.all('pacientes')).length,
     agendamentosPendentes: (await db.all('agendamentos')).filter((a) => a.status === 'pendente').length,
-    protesesEmAndamento: proteses.filter((p) => !['entregue'].includes(p.status)).length,
-    protesesProntas: proteses.filter((p) => p.status === 'pronta').length,
+    protesesEmAndamento: proteses.filter((p) => !['entregue', 'Concluído', 'concluído', 'concluido'].includes(p.status)).length,
+    protesesProntas: proteses.filter((p) => ['Revisão', 'pronta'].includes(p.status)).length,
     conversasAbertas: (await db.all('conversas')).filter((c) => (c.naoLidas || 0) > 0).length,
     totalRecebido: recebido, totalAReceber: aReceber
   });

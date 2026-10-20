@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import { db } from '../db.js';
 import { sendTextMessage } from './evolution.js';
 import { logger } from '../logger.js';
+import { config } from '../config.js';
 
 // Roda a cada 30 min: lembretes de agenda + follow-ups pós-entrega
 export function startReminders(io) {
@@ -12,7 +13,7 @@ export function startReminders(io) {
     );
     for (const ag of ags) {
       if (!ag.enviarLembrete) continue;
-      const texto = `🦷 Olá ${ag.pacienteNome}! Lembrete da *${process.env.CLINICA_NOME || 'Clínica'}*: você tem atendimento ${ag.data} — motivo: ${ag.motivo || 'avaliação'}. Responda *CONFIRMO* ou *REMARCAR*.`;
+      const texto = `Olá ${ag.pacienteNome}! Lembrete da *${config.business.name}*: vocês têm um compromisso ${ag.data}${ag.motivo ? ` sobre ${ag.motivo}` : ''}. Responda *CONFIRMO* ou *REMARCAR*.`;
         try {
           await sendTextMessage(ag.telefone, texto);
           await db.update('agendamentos', ag.id, { lembreteEnviado: true });
@@ -26,11 +27,11 @@ export function startReminders(io) {
     // follow-ups vencidos (previstoPara <= agora e status agendado)
     try {
       const now = new Date().toISOString();
-      const due = (await db.all('followups')).filter((f) => f.status === 'agendado' && f.previstoPara <= now);
+      const due = (await db.all('followups')).filter((f) => f.status === 'agendado' && f.previstoPara <= now && f.enviarWhatsApp === true);
       for (const f of due) {
         if (!f.telefone) continue;
         try {
-          await sendTextMessage(f.telefone, `🦷 *${process.env.CLINICA_NOME || 'Clínica'}* — ${f.titulo}\n\n${f.mensagem}`);
+          await sendTextMessage(f.telefone, `*${config.business.name}* — ${f.titulo}\n\n${f.mensagem}`);
           await db.update('followups', f.id, { status: 'enviado' });
           await db.insert('mensagens', { telefone: f.telefone, direcao: 'out-bot', texto: f.mensagem });
           logger.info(`[followup] enviado ${f.titulo} -> ${f.telefone}`);

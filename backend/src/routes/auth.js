@@ -11,13 +11,13 @@ const emailSchema = z.string()
   .trim()
   .min(1, 'Digite seu e-mail')
   .transform((v) => v.toLowerCase())
-  .refine((v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v), 'E-mail inválido — confira: nome@clinica.com');
+  .refine((v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v), 'E-mail inválido — confira o formato: nome@empresa.com');
 
 const registerSchema = z.object({
   nome: z.string().trim().min(2, 'Nome muito curto'),
   email: emailSchema,
   senha: z.string().min(10, 'Senha mínima: 10 caracteres').max(72, 'Senha muito longa (máximo: 72 caracteres)'),
-  papel: z.enum(['admin', 'atendente', 'dentista']).optional()
+  papel: z.enum(['admin', 'atendente', 'dentista', 'vendedor', 'desenvolvedor', 'suporte']).optional()
 });
 
 router.post('/api/auth/register', asyncHandler(async (req, res) => {

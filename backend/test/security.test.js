@@ -4,6 +4,7 @@ import { createServer } from 'node:http';
 import jwt from 'jsonwebtoken';
 import { buildApp } from '../src/app.js';
 import { config } from '../src/config.js';
+import { detectIntent, runFunction } from '../src/services/agentFunctions.js';
 
 let server;
 let base;
@@ -23,10 +24,21 @@ after(async () => {
   if (server) await new Promise((resolve) => server.close(resolve));
 });
 
-test('rotas clínicas exigem autenticação', async () => {
+test('rotas de dados exigem autenticação', async () => {
   const response = await fetch(`${base}/api/pacientes`);
   assert.equal(response.status, 401);
   assert.equal((await response.json()).code, 'AUTH_REQUIRED');
+});
+
+test('assistente usa linguagem comercial e não promete preços ou serviços gratuitos', async () => {
+  assert.equal(detectIntent('Preciso de um site para minha empresa'), 'desconhecida');
+  assert.equal(detectIntent('Quais serviços vocês fazem?'), 'info_clinica');
+  const value = await runFunction('consultar_valores', { text: 'Quanto custa um sistema?' });
+  assert.match(value.reply, /escopo|proposta/i);
+  assert.doesNotMatch(value.reply, /avaliação gratuita|dentadura|prótese/i);
+  const info = await runFunction('info_clinica', {});
+  assert.match(info.reply, /Seth Digital/);
+  assert.match(info.reply, /sites|sistemas/i);
 });
 
 test('fotos privadas não são servidas sem sessão', async () => {

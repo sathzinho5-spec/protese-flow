@@ -32,15 +32,15 @@ export default function Agenda() {
   return (
     <div>
       <div className="card" style={{ marginBottom: 14 }}>
-        <strong>Novo agendamento</strong>
+        <strong>Novo compromisso</strong>
         <form onSubmit={salvar} className="form-card" style={{ marginTop: 10 }}>
-          <input placeholder="Paciente *" value={form.pacienteNome} onChange={e => setForm({ ...form, pacienteNome: e.target.value })} required />
+          <input placeholder="Cliente / contato *" value={form.pacienteNome} onChange={e => setForm({ ...form, pacienteNome: e.target.value })} required />
           <input placeholder="WhatsApp *" value={form.telefone} onChange={e => setForm({ ...form, telefone: e.target.value })} required />
           <input placeholder="Data/hora ex: 10/10 14h *" value={form.data} onChange={e => setForm({ ...form, data: e.target.value })} required />
           <input type="datetime-local" title="Data real (opcional, p/ ordenar e lembrar)" value={form.dataHora} onChange={e => setForm({ ...form, dataHora: e.target.value })} />
-          <input placeholder="Motivo (avaliação, prova, ajuste...)" value={form.motivo} onChange={e => setForm({ ...form, motivo: e.target.value })} />
+          <input placeholder="Assunto (reunião, entrega, revisão...)" value={form.motivo} onChange={e => setForm({ ...form, motivo: e.target.value })} />
         </form>
-        <button className="btn btn-primary" onClick={salvar}>Agendar</button>
+        <button className="btn btn-primary" onClick={salvar}>Salvar compromisso</button>
       </div>
 
       <div className="grid2">

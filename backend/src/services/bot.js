@@ -2,16 +2,12 @@ import { db, normalizePhone, findPacienteByPhone, findConversaByPhone } from '..
 import { trySendText } from './evolution.js';
 import { getSession, setSession, retomarBot, pausarBot } from './sessions.js';
 import { logger } from '../logger.js';
+import { config } from '../config.js';
 
 export { retomarBot, pausarBot };
 
-const CLINICA_NOME = process.env.CLINICA_NOME || 'Clínica de Prótese Dentária';
-const CLINICA_ENDERECO = process.env.CLINICA_ENDERECO || 'Rua das Flores, 123 - Centro';
-const CLINICA_HORARIO = process.env.CLINICA_HORARIO || 'Seg a Sex 08h-18h, Sáb 08h-12h';
-
-const MENU = `Oi! 😊 Aqui é da *${CLINICA_NOME}*. Como posso te ajudar hoje? Pode me contar com suas palavras.`;
-
-const TABELA_PRECOS = 'O valor depende do tipo de prótese e da avaliação. A avaliação inicial é gratuita. Qual tipo você está procurando?';
+const MENU = `Oi! Aqui é da *${config.business.name}*. Como posso ajudar com seu site, sistema ou projeto digital?`;
+const SOBRE_VALORES = 'O investimento depende do escopo e dos recursos necessários. Se me contar o que seu negócio precisa, a equipe prepara uma proposta adequada.';
 
 export async function handleIncoming({ phone, text, pushName, io }) {
   phone = normalizePhone(phone);
@@ -38,14 +34,14 @@ export async function handleIncoming({ phone, text, pushName, io }) {
     try { await db.insert('logs', { autor: 'bot-whatsapp', acao: 'confirmar_agendamento', entidade: 'agendamentos', entidadeId: agPendente.id, detalhe: `${agPendente.pacienteNome} confirmou via WhatsApp` }); } catch {}
     io?.emit('agendamento:novo', { telefone: phone, auto: 'confirmado' });
     await setSession(phone, { step: 'menu', data: {} });
-    return reply(phone, `✅ *Presença confirmada!* 🎉\n\n📅 ${agPendente.data}\n🦷 ${agPendente.motivo || 'atendimento'}\n\nChegue com 10 min de antecedência. Se precisar remarcar, digite *REMARCAR*.`, io);
+    return reply(phone, `Compromisso confirmado para ${agPendente.data}. Se precisar alterar, é só avisar por aqui.`, io);
   }
   if (agPendente && /^(remarcar|reagendar|trocar|não vou|nao vou|cancelar|cancela|desmarcar)/i.test(text.trim())) {
     await db.update('agendamentos', agPendente.id, { status: 'cancelado', motivoCancel: text });
     try { await db.insert('logs', { autor: 'bot-whatsapp', acao: 'cancelar_agendamento', entidade: 'agendamentos', entidadeId: agPendente.id, detalhe: `${agPendente.pacienteNome}: ${text}` }); } catch {}
     io?.emit('agendamento:novo', { telefone: phone, auto: 'cancelado' });
     await setSession(phone, { step: 'ag_data', data: { nome: agPendente.pacienteNome } });
-    return reply(phone, `😔 Entendi, cancelei o horário de *${agPendente.data}*.\n\n📅 Qual nova data prefere? (ex: 12/10 manhã)`, io);
+      return reply(phone, `Cancelei o compromisso de ${agPendente.data}. Qual dia e período seriam melhores para remarcar?`, io);
   }
 
   if (['menu', 'oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'início', 'inicio'].includes(lower)) {
@@ -76,10 +72,10 @@ export async function handleIncoming({ phone, text, pushName, io }) {
       return handleMenu(phone, text, io);
     case 'ag_nome':
       await setSession(phone, { step: 'ag_data', data: { ...session.data, nome: text } });
-      return reply(phone, `Obrigado, ${text}! 📅 Qual data prefere? (ex: 10/10 manhã ou 11/10 tarde)`, io);
+      return reply(phone, `Obrigado, ${text}. Qual dia e período são melhores para uma conversa com a equipe?`, io);
     case 'ag_data':
       await setSession(phone, { step: 'ag_periodo', data: { ...session.data, dataPref: text } });
-      return reply(phone, 'Anotado! 📝 Qual o motivo? Ex: *dentadura quebrada, avaliação, prótese nova, ajuste, implante*', io);
+      return reply(phone, 'Anotado. Qual assunto ou projeto você gostaria de conversar com a equipe?', io);
     case 'ag_periodo': {
       const data = { ...session.data, motivo: text };
       const { parseDataAgendamento } = await import('../utils/data.js');
@@ -95,7 +91,7 @@ export async function handleIncoming({ phone, text, pushName, io }) {
       });
       await setSession(phone, { step: 'menu', data: {} });
       io?.emit('agendamento:novo', { telefone: phone, motivo: text });
-      return reply(phone, `✅ *Pré-agendamento registrado!*\n\n👤 ${data.nome || paciente.nome}\n📅 ${data.dataPref}\n🦷 Motivo: ${data.motivo}\n\nNossa equipe vai confirmar o horário aqui mesmo. Obrigado! 😁\n\nDigite *menu* para voltar.`, io);
+      return reply(phone, `Anotei seu pedido de conversa para ${data.dataPref}, sobre ${data.motivo}. A equipe vai confirmar a disponibilidade por aqui.`, io);
     }
     default:
       return reply(phone, MENU, io);
@@ -108,12 +104,12 @@ async function handleMenu(phone, text, io) {
     const pac = await findPacienteByPhone(phone);
     if (pac?.nome && pac.nome !== 'Paciente') {
       await setSession(phone, { step: 'ag_data', data: { nome: pac.nome } });
-      return reply(phone, `Olá ${pac.nome}! 📅 Qual data prefere? (ex: 10/10 manhã)`, io);
+      return reply(phone, `Olá, ${pac.nome}! Qual dia e período são melhores para conversar com a equipe?`, io);
     }
     await setSession(phone, { step: 'ag_nome' });
-    return reply(phone, 'Ótimo! Para agendar sua *avaliação gratuita* 🦷\nQual seu nome completo?', io);
+    return reply(phone, 'Claro. Qual nome posso informar para a equipe organizar uma conversa?', io);
   }
-  if (t === '2') return reply(phone, TABELA_PRECOS, io);
+  if (t === '2') return reply(phone, SOBRE_VALORES, io);
   if (t === '3') {
     const proteses = await db.query('proteses', () => true);
     const minhas = [];
@@ -121,16 +117,17 @@ async function handleMenu(phone, text, io) {
       const pac = pr.pacienteId ? await db.find('pacientes', pr.pacienteId) : null;
       if (pac && normalizePhone(pac.telefone) === phone) minhas.push(pr);
     }
-    if (!minhas.length) return reply(phone, '🔍 Não encontrei prótese vinculada ao seu WhatsApp.\nDigite *4* para falar com atendente.', io);
+    if (!minhas.length) return reply(phone, 'Não encontrei um projeto vinculado a este WhatsApp. Posso pedir para a equipe conferir.', io);
     const lista = minhas.map((p) => `• *${p.tipo}* — ${p.status} (prev: ${p.previsao || 'a combinar'})`).join('\n');
-    return reply(phone, `🦷 *Status da sua prótese:*\n${lista}\n\nDigite *menu* para voltar.`, io);
+    return reply(phone, `Consultei o andamento do seu projeto:\n${lista}`, io);
   }
   if (t === '4') {
     await setSession(phone, { botAtivo: false });
     return reply(phone, '✅ Chamando atendente humano... Já já te respondemos aqui! 🙏', io);
   }
   if (t === '5') {
-    return reply(phone, `📍 *${CLINICA_NOME}*\n${CLINICA_ENDERECO}\n🕐 ${CLINICA_HORARIO}\n\nDigite *menu* para voltar ou *1* para agendar.`, io);
+    const info = [config.business.name, config.business.tagline, config.business.address, config.business.hours].filter(Boolean).join('\n');
+    return reply(phone, info, io);
   }
   return reply(phone, 'Não entendi muito bem. Pode me explicar de outro jeito? Se preferir, encaminho você para a equipe.', io);
 }

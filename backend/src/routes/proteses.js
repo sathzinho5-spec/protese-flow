@@ -23,7 +23,7 @@ router.get('/api/proteses', asyncHandler(async (req, res) => {
 
 router.post('/api/proteses', asyncHandler(async (req, res) => {
   const body = z.object({ pacienteId: z.string().min(1), tipo: z.string().min(2) }).passthrough().parse(req.body);
-  const nova = await db.insert('proteses', { status: 'orçado', valor: Number(body.valor || 0), garantiaMeses: 12, ...body });
+  const nova = await db.insert('proteses', { status: 'Briefing', valor: Number(body.valor || 0), ...body });
   audit(req, 'criar_protese', 'proteses', nova.id, nova.tipo);
   res.json(nova);
 }));
@@ -34,14 +34,14 @@ router.put('/api/proteses/:id', asyncHandler(async (req, res) => {
   if (patch.valor !== undefined) patch.valor = Number(patch.valor);
   const dep = await db.update('proteses', req.params.id, patch);
   audit(req, 'atualizar_protese', 'proteses', req.params.id, `${antes?.status} -> ${patch.status || antes?.status}`);
-  if (patch.status === 'entregue' && antes?.status !== 'entregue' && dep) {
+  const finalizado = ['concluído', 'concluido', 'entregue'].includes(String(patch.status || '').toLowerCase());
+  const jaFinalizado = ['concluído', 'concluido', 'entregue'].includes(String(antes?.status || '').toLowerCase());
+  if (finalizado && !jaFinalizado && dep) {
     const pac = dep.pacienteId ? await db.find('pacientes', dep.pacienteId) : null;
     const base = Date.now();
     const etapas = [
-      { dias: 7, titulo: 'Ajuste inicial (7 dias)', msg: 'Olá! Como está a adaptação da prótese? Qualquer incômodo, agende um ajuste gratuito.' },
-      { dias: 30, titulo: 'Revisão 30 dias', msg: 'Revisão de 30 dias da sua prótese. Está tudo confortável? Quer agendar revisão?' },
-      { dias: 180, titulo: 'Manutenção 6 meses', msg: 'Hora da manutenção preventiva da sua prótese (limpeza + aperto). Vamos agendar?' },
-      { dias: 365, titulo: 'Garantia 12 meses', msg: 'Sua garantia de 1 ano vence em breve. Agende avaliação gratuita de garantia.' },
+      { dias: 7, titulo: 'Retorno sobre a entrega', msg: 'Olá! Passando para confirmar se recebeu tudo certo. Se houver algum ajuste ou dúvida, pode responder por aqui.' },
+      { dias: 30, titulo: 'Acompanhamento do projeto', msg: 'Olá! Como está a experiência com o projeto entregue? Se precisar de suporte, conte para a equipe.' },
     ];
     for (const e of etapas) {
       await db.insert('followups', {
@@ -65,13 +65,15 @@ router.get('/api/proteses/:id/fotos', asyncHandler(async (req, res) => {
   res.json((await db.query('fotos', (f) => f.proteseId === req.params.id)).reverse());
 }));
 router.post('/api/proteses/:id/fotos', upload.single('foto'), asyncHandler(async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'arquivo foto obrigatório' });
+  if (!req.file) return res.status(400).json({ error: 'Envie uma imagem ou PDF.' });
   const protese = await db.find('proteses', req.params.id);
-  if (!protese) return res.status(404).json({ error: 'prótese não encontrada' });
+  if (!protese) return res.status(404).json({ error: 'Projeto não encontrado' });
   const foto = await db.insert('fotos', {
     proteseId: req.params.id, url: `/uploads/${req.file.filename}`,
-    legenda: req.body.legenda || req.body.etapa || 'evolução',
-    etapa: req.body.etapa || 'geral', autor: req.user?.nome || 'atendente'
+    legenda: req.file.originalname,
+    etapa: req.body.etapa || 'Material do projeto',
+    originalName: req.file.originalname, mimeType: req.file.mimetype,
+    autor: req.user?.nome || 'equipe'
   });
   res.json(foto);
 }));
@@ -79,22 +81,22 @@ router.post('/api/proteses/:id/fotos', upload.single('foto'), asyncHandler(async
 // pdf + envio
 router.get('/api/proteses/:id/orcamento.pdf', asyncHandler(async (req, res) => {
   const protese = await db.find('proteses', req.params.id);
-  if (!protese) return res.status(404).json({ error: 'não encontrada' });
+  if (!protese) return res.status(404).json({ error: 'Projeto não encontrado' });
   const paciente = protese.pacienteId ? await db.find('pacientes', protese.pacienteId) : null;
   const lancs = await db.query('lancamentos', (l) => l.proteseId === protese.id);
   const buf = await orcamentoPDF({ protese, paciente, lancamentos: lancs });
   audit(req, 'gerar_orcamento_pdf', 'proteses', protese.id, paciente?.nome);
   res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename=orcamento-${protese.id}.pdf`);
+  res.setHeader('Content-Disposition', `attachment; filename=proposta-${protese.id}.pdf`);
   res.send(buf);
 }));
 
 router.post('/api/proteses/:id/enviar-orcamento', asyncHandler(async (req, res) => {
   const protese = await db.find('proteses', req.params.id);
-  if (!protese) return res.status(404).json({ error: 'não encontrada' });
+  if (!protese) return res.status(404).json({ error: 'Projeto não encontrado' });
   const paciente = protese.pacienteId ? await db.find('pacientes', protese.pacienteId) : null;
-  if (!paciente?.telefone) return res.status(400).json({ error: 'paciente sem WhatsApp' });
-  const texto = `🦷 *Orçamento — ${config.clinica.nome}*\n\n👤 ${paciente.nome}\n🔧 ${protese.tipo}\n💰 Valor: R$ ${protese.valor}\n📅 Previsão: ${protese.previsao || 'a combinar'}\n\nResponda *APROVO* para aprovar ou *ATENDENTE* para falar conosco.`;
+  if (!paciente?.telefone) return res.status(400).json({ error: 'Cliente sem WhatsApp cadastrado' });
+  const texto = `*Proposta — ${config.business.name}*\n\nCliente: ${paciente.empresa || paciente.nome}\nProjeto: ${protese.tipo}\nInvestimento: R$ ${protese.valor || 'a combinar'}\nPrevisão: ${protese.previsao || 'a combinar'}\n\nSe quiser conversar sobre algum ponto, é só responder esta mensagem.`;
   const envio = await trySendText(normalizePhone(paciente.telefone), texto);
   await db.insert('mensagens', { telefone: normalizePhone(paciente.telefone), direcao: 'out-humano', texto, autor: req.user?.nome, enviado: envio.sent });
   audit(req, 'enviar_orcamento_whats', 'proteses', protese.id, paciente.nome);

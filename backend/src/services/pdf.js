@@ -1,9 +1,10 @@
 import PDFDocument from 'pdfkit';
+import { config } from '../config.js';
 
 function header(doc, titulo) {
-  const nome = process.env.CLINICA_NOME || 'Clínica de Prótese Dentária';
-  doc.fontSize(18).text(`🦷 ${nome}`, { align: 'center' });
-  doc.fontSize(10).fillColor('#555').text(`${process.env.CLINICA_ENDERECO || ''} • ${process.env.CLINICA_HORARIO || ''}`, { align: 'center' });
+  doc.fontSize(18).text(config.business.name, { align: 'center' });
+  const details = [config.business.tagline, config.business.address, config.business.hours].filter(Boolean).join(' • ');
+  if (details) doc.fontSize(10).fillColor('#555').text(details, { align: 'center' });
   doc.moveDown();
   doc.fillColor('#000').fontSize(14).text(titulo, { align: 'center', underline: true });
   doc.moveDown();
@@ -18,22 +19,22 @@ export function orcamentoPDF({ protese, paciente, lancamentos = [] }) {
     const chunks = [];
     doc.on('data', (c) => chunks.push(c));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
-    header(doc, 'ORÇAMENTO — PRÓTESE DENTÁRIA');
-    row(doc, 'Paciente', paciente?.nome);
-    row(doc, 'WhatsApp', paciente?.telefone);
-    row(doc, 'Tipo de prótese', protese.tipo);
-    row(doc, 'Status', protese.status);
-    row(doc, 'Previsão', protese.previsao || 'a combinar');
-    row(doc, 'Valor total', `R$ ${protese.valor || 0}`);
+    header(doc, 'PROPOSTA COMERCIAL');
+    row(doc, 'Cliente', paciente?.empresa || paciente?.nome);
+    row(doc, 'Contato', paciente?.telefone);
+    row(doc, 'Projeto', protese.tipo);
+    row(doc, 'Etapa', protese.status);
+    row(doc, 'Previsão de entrega', protese.previsao || 'a combinar');
+    row(doc, 'Investimento', `R$ ${protese.valor || 0}`);
     const pago = lancamentos.filter(l => l.status === 'pago').reduce((s, l) => s + Number(l.valor || 0), 0);
     row(doc, 'Pago', `R$ ${pago}`);
     row(doc, 'Saldo', `R$ ${Number(protese.valor || 0) - pago}`);
     doc.moveDown();
-    doc.fontSize(10).fillColor('#555').text('Validade do orçamento: 30 dias. Valores podem variar após avaliação clínica. Garantia de 1 ano contra defeitos de fabricação (não cobre quebra por queda/mordida inadequada).');
+    doc.fontSize(10).fillColor('#555').text('Escopo, prazos e condições finais devem ser confirmados entre as partes antes do início do projeto.');
     doc.moveDown();
-    doc.fillColor('#000').fontSize(11).text('Assinatura da clínica: ___________________________');
-    doc.text('Assinatura do paciente: ___________________________');
-    doc.moveDown().fontSize(9).fillColor('#777').text(`Emitido em ${new Date().toLocaleString()} • PróteseFácil`);
+    doc.fillColor('#000').fontSize(11).text('Seth Digital: _________________________________');
+    doc.text('Cliente: _____________________________________');
+    doc.moveDown().fontSize(9).fillColor('#777').text(`Emitido em ${new Date().toLocaleString()} • ${config.business.name}`);
     doc.end();
   });
 }
@@ -45,7 +46,7 @@ export function reciboPDF({ lanc, paciente, protese }) {
     doc.on('data', (c) => chunks.push(c));
     doc.on('end', () => resolve(Buffer.concat(chunks)));
     header(doc, 'RECIBO DE PAGAMENTO');
-    row(doc, 'Recebido de', paciente?.nome || lanc.descricao);
+    row(doc, 'Recebido de', paciente?.empresa || paciente?.nome || lanc.descricao);
     row(doc, 'Valor', `R$ ${lanc.valor}`);
     row(doc, 'Referente a', `${lanc.descricao} ${protese ? `(${protese.tipo})` : ''}`);
     row(doc, 'Forma', lanc.forma || '—');
@@ -53,7 +54,7 @@ export function reciboPDF({ lanc, paciente, protese }) {
     row(doc, 'Status', lanc.status);
     doc.moveDown();
     doc.fontSize(11).text('Assinatura: ___________________________');
-    doc.moveDown().fontSize(9).fillColor('#777').text(`Recibo ${lanc.id} • Emitido em ${new Date().toLocaleString()} • PróteseFácil`);
+    doc.moveDown().fontSize(9).fillColor('#777').text(`Recibo ${lanc.id} • Emitido em ${new Date().toLocaleString()} • ${config.business.name}`);
     doc.end();
   });
 }

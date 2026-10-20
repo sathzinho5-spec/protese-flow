@@ -4,7 +4,7 @@ import { toast } from '../components/ui.jsx';
 
 export default function Equipe() {
   const [lista, setLista] = useState([]);
-  const [form, setForm] = useState({ nome: '', email: '', senha: '', papel: 'atendente' });
+  const [form, setForm] = useState({ nome: '', email: '', senha: '', papel: 'desenvolvedor' });
   const carregar = () => api.get('/api/usuarios').then(r => setLista(r.data));
   useEffect(() => { carregar(); }, []);
 
@@ -12,7 +12,7 @@ export default function Equipe() {
     e.preventDefault();
     try {
       await api.post('/api/auth/register', form);
-      setForm({ nome: '', email: '', senha: '', papel: 'atendente' });
+      setForm({ nome: '', email: '', senha: '', papel: 'desenvolvedor' });
       carregar();
     } catch (err) { toast(apiError(err), 'erro'); }
   };
@@ -20,12 +20,12 @@ export default function Equipe() {
   return (
     <div>
       <div className="card" style={{ marginBottom: 14 }}>
-        <strong>Novo atendente</strong>
+        <strong>Novo acesso à equipe</strong>
         <form onSubmit={salvar} className="form-card" style={{ marginTop: 10 }}>
           <input placeholder="Nome *" value={form.nome} onChange={e => setForm({ ...form, nome: e.target.value })} required />
           <input placeholder="E-mail *" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required />
           <input placeholder="Senha *" type="password" value={form.senha} onChange={e => setForm({ ...form, senha: e.target.value })} required />
-          <select value={form.papel} onChange={e => setForm({ ...form, papel: e.target.value })}><option value="atendente">Atendente</option><option value="admin">Admin</option><option value="dentista">Dentista</option></select>
+          <select value={form.papel} onChange={e => setForm({ ...form, papel: e.target.value })}><option value="desenvolvedor">Desenvolvedor</option><option value="vendedor">Comercial</option><option value="suporte">Suporte</option><option value="atendente">Atendimento</option><option value="admin">Admin</option></select>
         </form>
         <button className="btn btn-primary" onClick={salvar}>Cadastrar acesso</button>
       </div>
