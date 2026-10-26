@@ -1,10 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 
 export default function Config() {
   const [qr, setQr] = useState(null);
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
+  const [estado, setEstado] = useState('verificando');
+
+  useEffect(() => {
+    const verificar = () => api.get('/api/whatsapp/estado').then(r => setEstado(r.data.connected ? 'conectado' : r.data.state)).catch(() => setEstado('indisponível'));
+    verificar();
+    const timer = setInterval(verificar, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   const criar = async () => {
     setMsg('Criando instância...');
@@ -33,6 +41,7 @@ export default function Config() {
     <div>
       <div className="card" style={{ marginBottom: 14 }}>
         <h2 style={{ margin: '0 0 4px' }}>Conectar WhatsApp 📲</h2>
+        <p><span className={`pill wa-status wa-${estado}`}>● {estado === 'open' || estado === 'conectado' ? 'Conectado' : estado === 'connecting' ? 'Aguardando pareamento' : estado === 'indisponível' ? 'Evolution indisponível' : 'Desconectado'}</span></p>
         <p className="muted small">Pareamento via QR Code (Evolution API / Baileys). Sem ele, o painel funciona em modo demonstração.</p>
         <div className="steps">
           <div className="step"><b>1. Evolution online</b><span className="small muted">Use a Evolution já iniciada em localhost:8080; não suba outra cópia na mesma porta.</span></div>

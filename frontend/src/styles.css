@@ -490,6 +490,72 @@ tbody tr:hover { background: #f8fbff; }
 .stat-finance .stat-icon { color: #28715b; background: #e9f5ee; }
 .section-kicker, .stat-caption { color: #8a98aa; }
 
+/* Seth Digital: cohesive identity and complete CRM/project workflows. */
+:root {
+  --bg: #f4f7f8;
+  --ink: #172b3a;
+  --muted: #71808b;
+  --line: #e2e9eb;
+  --brand: #167b83;
+  --brand-dark: #105c66;
+  --brand-light: #e8f5f5;
+  --accent: #31a38d;
+}
+.brand-logo { background: linear-gradient(140deg, #167b83, #31a38d); }
+.nav button.active { color: #105c66; background: #e8f5f5; box-shadow: inset 3px 0 #31a38d; }
+.nav .count, .nav button.active .count { background: #167b83; }
+.btn-primary { background: #167b83; border-color: #167b83; }
+.btn-primary:hover { background: #105c66; }
+.btn:focus-visible, .nav button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline-color: rgba(22,123,131,.3); }
+.welcome-card { background: linear-gradient(112deg, #102c43 0%, #155f70 58%, #168b83 100%); }
+.welcome-primary { color: #105c66; }
+.code-orbit { width: 156px; height: 156px; display: grid; place-items: center; border: 1px solid rgba(229,245,255,.36); border-radius: 50%; background: radial-gradient(circle at 35% 25%, rgba(216,245,255,.25), rgba(255,255,255,.035) 68%); box-shadow: 0 0 0 17px rgba(231,249,236,.035), 0 0 0 34px rgba(231,249,236,.025); }
+.code-orbit span { color: #daf7f1; font: 700 47px/1 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: -.1em; filter: drop-shadow(0 10px 10px rgba(8,36,28,.2)); animation: code-float 4s ease-in-out infinite; }
+@keyframes code-float { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-7px) rotate(2deg); } }
+.project-form { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; }
+.project-form textarea, .project-form .form-actions { grid-column: 1 / -1; }
+.form-card textarea, .project-details-form textarea, .project-details-form input, .project-details-form select, .payment-form input, .payment-form select, .field-label input, .field-label select {
+  width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--ink); background: #fff; font: inherit;
+}
+.field-label { display: grid; gap: 6px; flex: 1; min-width: 135px; color: var(--muted); font-size: 11px; font-weight: 700; }
+.form-actions { display: flex; justify-content: flex-end; }
+.project-detail { max-height: calc(100vh - 130px); overflow: auto; position: sticky; top: 6px; }
+.project-money { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin: 12px 0; }
+.project-money > div { display: grid; gap: 4px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: #f7fafb; }
+.project-money span { color: var(--muted); font-size: 10px; }
+.project-money b { font-size: 13px; }
+.project-actions { margin-bottom: 12px; }
+.project-details-form { display: grid; gap: 8px; margin: 12px 0; }
+.project-details-form .form-row { align-items: end; }
+.project-tasks { margin: 14px 0; }
+.project-tasks .page-head { margin-bottom: 7px; }
+.task-progress { height: 6px; margin: 8px 0 12px; border-radius: 9px; overflow: hidden; background: #e8eef0; }
+.task-progress span { display: block; height: 100%; border-radius: inherit; background: #31a38d; transition: width .2s ease; }
+.task-list { display: grid; gap: 6px; }
+.task-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 9px; }
+.task-item label { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 12px; }
+.task-item input { accent-color: var(--brand); }
+.task-item button { border: 0; background: transparent; color: var(--muted); font-size: 18px; cursor: pointer; }
+.task-done { color: var(--muted); text-decoration: line-through; }
+.task-add { display: flex; gap: 7px; margin-top: 9px; }
+.task-add input { min-width: 0; flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.payment-form { display: grid; gap: 8px; margin: 10px 0; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: #f7fafb; }
+.project-delete { margin-top: 14px; color: #9e4040; }
+.kanban-empty { padding: 12px; color: var(--muted); font-size: 12px; text-align: center; }
+.wa-status { text-transform: capitalize; }
+.wa-conectado, .wa-open { color: #146345; background: #dcf5e7; }
+.wa-connecting, .wa-verificando { color: #8c6414; background: #fff2d1; }
+.wa-close, .wa-closed, .wa-desconectado, .wa-indisponível, .wa-indisponivel, .wa-unknown { color: #8d3c42; background: #fde8e8; }
+.toasts .toast.erro { background: #953b45; }
+
+@media (max-width: 860px) {
+  .project-form { grid-template-columns: 1fr !important; }
+  .project-detail { max-height: none; position: static; }
+  .code-orbit { width: 130px; height: 130px; }
+  .code-orbit span { font-size: 40px; }
+}
+@media (prefers-reduced-motion: reduce) { .code-orbit span { animation: none; } }
+
 @media (max-width: 860px) {
   .sidebar { display: none; }
   .topbar { background: rgba(255,255,255,.94); }

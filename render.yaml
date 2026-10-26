@@ -37,18 +37,18 @@ services:
           envVarKey: AUTHENTICATION_API_KEY
       - key: EVOLUTION_INSTANCE
         value: clinica-protese
-      - key: CLINICA_NOME
-        value: Clínica de Prótese Dentária
-      - key: CLINICA_ENDERECO
-        value: Configure o endereço no painel Render
-      - key: CLINICA_HORARIO
-        value: Configure o horário no painel Render
+      - key: BUSINESS_NAME
+        value: Seth Digital
+      - key: BUSINESS_TAGLINE
+        value: Sites e sistemas para negócios
+      - key: BUSINESS_SERVICES
+        value: sites institucionais, landing pages, lojas virtuais, sistemas web, automações
 
   - type: pserv
     name: protese-flow-pedro-evolution
     runtime: image
     image:
-      url: docker.io/atendai/evolution-api:v2.1.75
+      url: docker.io/evoapicloud/evolution-api:v2.3.7
     region: ohio
     plan: starter
     disk:

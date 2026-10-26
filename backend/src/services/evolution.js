@@ -34,6 +34,12 @@ export async function getQrCode() {
   }
 }
 
+export async function getConnectionState() {
+  const res = await api.get(`/instance/connectionState/${encodeURIComponent(config.evolutionInstance)}`);
+  const state = res.data?.instance?.state || res.data?.instance?.connectionStatus || res.data?.state || 'unknown';
+  return { state: String(state).toLowerCase(), connected: String(state).toLowerCase() === 'open' };
+}
+
 export async function configureWebhook() {
   const url = process.env.EVOLUTION_WEBHOOK_URL || 'http://host.docker.internal:3001/webhook/evolution';
   const res = await api.post(`/webhook/set/${encodeURIComponent(config.evolutionInstance)}`, {

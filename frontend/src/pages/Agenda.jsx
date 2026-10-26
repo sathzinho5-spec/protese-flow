@@ -22,9 +22,10 @@ export default function Agenda() {
       await api.post('/api/agendamentos', payload);
       setForm({ pacienteNome: '', telefone: '', data: '', dataHora: '', motivo: '' });
       carregar();
+      toast('Compromisso salvo ✓');
     } catch (err) { toast(err.response?.data?.error || 'Falha ao agendar', 'erro'); }
   };
-  const setStatus = (id, status) => api.put(`/api/agendamentos/${id}`, { status }).then(carregar);
+  const setStatus = (id, status) => api.put(`/api/agendamentos/${id}`, { status }).then(carregar).catch(err => toast(err.response?.data?.error || 'Falha ao atualizar compromisso', 'erro'));
 
   const pendentes = lista.filter(a => a.status === 'pendente');
   const confirmados = lista.filter(a => a.status === 'confirmado');
@@ -35,12 +36,12 @@ export default function Agenda() {
         <strong>Novo compromisso</strong>
         <form onSubmit={salvar} className="form-card" style={{ marginTop: 10 }}>
           <input placeholder="Cliente / contato *" value={form.pacienteNome} onChange={e => setForm({ ...form, pacienteNome: e.target.value })} required />
-          <input placeholder="WhatsApp *" value={form.telefone} onChange={e => setForm({ ...form, telefone: e.target.value })} required />
+          <input placeholder="WhatsApp (opcional)" value={form.telefone} onChange={e => setForm({ ...form, telefone: e.target.value })} />
           <input placeholder="Data/hora ex: 10/10 14h *" value={form.data} onChange={e => setForm({ ...form, data: e.target.value })} required />
           <input type="datetime-local" title="Data real (opcional, p/ ordenar e lembrar)" value={form.dataHora} onChange={e => setForm({ ...form, dataHora: e.target.value })} />
           <input placeholder="Assunto (reunião, entrega, revisão...)" value={form.motivo} onChange={e => setForm({ ...form, motivo: e.target.value })} />
+          <button className="btn btn-primary" type="submit">Salvar compromisso</button>
         </form>
-        <button className="btn btn-primary" onClick={salvar}>Salvar compromisso</button>
       </div>
 
       <div className="grid2">

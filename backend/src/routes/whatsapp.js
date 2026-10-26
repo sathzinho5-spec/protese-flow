@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { db } from '../db.js';
 import { asyncHandler } from '../utils/http.js';
-import { getQrCode, createInstance, configureWebhook } from '../services/evolution.js';
+import { getQrCode, createInstance, configureWebhook, getConnectionState } from '../services/evolution.js';
 
 const router = Router();
 
 router.get('/api/whatsapp/qrcode', asyncHandler(async (req, res) => { res.json(await getQrCode()); }));
+router.get('/api/whatsapp/estado', asyncHandler(async (req, res) => { res.json(await getConnectionState()); }));
 router.post('/api/whatsapp/criar', asyncHandler(async (req, res) => { res.json(await createInstance()); }));
 router.post('/api/whatsapp/webhook', asyncHandler(async (req, res) => { res.json(await configureWebhook()); }));
 

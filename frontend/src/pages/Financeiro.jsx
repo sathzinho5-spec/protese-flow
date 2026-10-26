@@ -14,9 +14,12 @@ export default function Financeiro() {
 
   const salvar = async (e) => {
     e.preventDefault();
-    await api.post('/api/financeiro', form);
-    setForm({ descricao: '', valor: '', proteseId: '', forma: 'pix', tipo: 'entrada', status: 'pendente', data: new Date().toISOString().slice(0, 10) });
-    carregar();
+    try {
+      await api.post('/api/financeiro', form);
+      setForm({ descricao: '', valor: '', proteseId: '', forma: 'pix', tipo: 'entrada', status: 'pendente', data: new Date().toISOString().slice(0, 10) });
+      carregar();
+      toast('Lançamento registrado ✓');
+    } catch (e) { toast(apiError(e, 'Não foi possível registrar o lançamento'), 'erro'); }
   };
 
   return (
@@ -40,8 +43,8 @@ export default function Financeiro() {
           <select value={form.tipo} onChange={e => setForm({ ...form, tipo: e.target.value })}><option value="entrada">Entrada</option><option value="parcela">Parcela</option><option value="pagamento">Pagamento total</option></select>
           <select value={form.forma} onChange={e => setForm({ ...form, forma: e.target.value })}><option value="pix">Pix</option><option value="dinheiro">Dinheiro</option><option value="cartao">Cartão</option><option value="boleto">Boleto</option></select>
           <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}><option value="pendente">Pendente</option><option value="pago">Pago ✓</option></select>
+          <button className="btn btn-primary" type="submit">Registrar lançamento</button>
         </form>
-        <button className="btn btn-primary" onClick={salvar}>Lançar</button>
       </div>
 
       <div className="card" style={{ padding: 0 }}>
@@ -60,7 +63,7 @@ export default function Financeiro() {
                   <td className="actions">
                     {l.status !== 'pago' && <button className="btn btn-sm btn-primary" onClick={() => api.put(`/api/financeiro/${l.id}`, { status: 'pago' }).then(carregar)}>Dar baixa</button>}
                     <a className="btn btn-sm" href={authUrl(`/api/financeiro/${l.id}/recibo.pdf`)} target="_blank" rel="noreferrer">🧾 Recibo</a>
-                    <button className="btn btn-sm" onClick={() => api.delete(`/api/financeiro/${l.id}`).then(carregar).catch(e => toast(apiError(e, 'Apenas admin pode excluir'), 'erro'))}>Excluir</button>
+                    <button className="btn btn-sm" onClick={() => { if (window.confirm(`Excluir o lançamento “${l.descricao}”?`)) api.delete(`/api/financeiro/${l.id}`).then(carregar).catch(e => toast(apiError(e, 'Apenas admin pode excluir'), 'erro')); }}>Excluir</button>
                   </td>
                 </tr>
               ))}

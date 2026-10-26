@@ -38,6 +38,7 @@ const TABS = {
 export default function App() {
   const [aba, setAba] = useState('dashboard');
   const [dash, setDash] = useState({});
+  const [whatsapp, setWhatsapp] = useState('verificando');
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(() => {
     try { return JSON.parse(localStorage.getItem('pf_user')); } catch { return null; }
@@ -49,6 +50,14 @@ export default function App() {
     if (!logado) return;
     refresh();
     const t = setInterval(refresh, 10000);
+    return () => clearInterval(t);
+  }, [logado]);
+
+  useEffect(() => {
+    if (!logado) return;
+    const verificar = () => api.get('/api/whatsapp/estado').then(r => setWhatsapp(r.data.connected ? 'conectado' : (r.data.state || 'desconectado'))).catch(() => setWhatsapp('indisponível'));
+    verificar();
+    const t = setInterval(verificar, 20000);
     return () => clearInterval(t);
   }, [logado]);
 
@@ -114,7 +123,7 @@ export default function App() {
             <div className="sub">{TABS[aba].sub}</div>
           </div>
           <div className="top-search">
-            <span className="pill confirmado hide-mobile">● WhatsApp</span>
+          <span className={`pill wa-status wa-${whatsapp} hide-mobile`} title="Estado atualizado automaticamente">● WhatsApp: {{ conectado: 'conectado', open: 'conectado', connecting: 'conectando', close: 'desconectado', closed: 'desconectado', indisponível: 'indisponível', verificando: 'verificando' }[whatsapp] || 'desconectado'}</span>
           <button className="btn btn-primary top-cta" onClick={() => go('agenda')}>+ <span className="hide-mobile">Novo prazo</span><span className="only-mobile">Agendar</span></button>
           </div>
         </div>

@@ -27,7 +27,7 @@ export default function Dashboard({ dash, go }) {
         </div>
         <div className="welcome-art" aria-hidden="true">
           <div className="welcome-date">{hoje}</div>
-          <div className="tooth-orbit"><span>✦</span></div>
+          <div className="code-orbit"><span>&lt;/&gt;</span></div>
           <div className="welcome-note"><span className="status-dot" /> Tudo em um só lugar</div>
         </div>
         <div className="welcome-orb welcome-orb-one" />
